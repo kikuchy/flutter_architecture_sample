@@ -60,6 +60,12 @@ class DummyBackend implements AccountRepository, RoomRepository {
   }
 
   @override
+  Future<void> logout() async {
+    _currentUser = null;
+    _userStateController.add(null);
+  }
+
+  @override
   Future<void> removeRoomMember(
       {@required String roomId, @required String uid}) async {
     _roomIdAndRoom[roomId].joiningMembers.remove(uid);

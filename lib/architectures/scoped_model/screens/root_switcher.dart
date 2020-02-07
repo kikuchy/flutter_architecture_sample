@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:rxdart/rxdart.dart';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/screens/guest_area/welcome.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/screens/member_area/room_list.dart';
@@ -10,17 +10,14 @@ class RootSwitcher {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
   StreamSubscription<bool> _subscription;
 
-  static subscribeLoginState(AccountRepository repository) {
-    final this$ = RootSwitcher();
-    this$._subscription = repository
+  RootSwitcher(AccountRepository repository) {
+    _subscription = repository
         .subscribeUid()
-    .doOnData(print)
         .distinct()
         .map((event) => event != null)
         .listen((loggedIn) {
-      this$.onLoginStateChanged(loggedIn);
+      onLoginStateChanged(loggedIn);
     });
-    return this$;
   }
 
   void _switchRootToNamed(String name) {

@@ -10,31 +10,43 @@ class ScopedModelApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeManager = RouteManager();
-    final backend = DummyBackend();
-    final RootSwitcher rootSwitcher = RootSwitcher.subscribeLoginState(backend);
     return MultiProvider(
       providers: [
         Provider<DummyBackend>(
-          create: (_) => backend,
+          create: (_) => DummyBackend(),
           dispose: (_, b) => b.dispose(),
         ),
-        Provider<AccountRepository>.value(value: backend),
-        Provider<RootSwitcher>(
-          create: (context) => rootSwitcher,
-          dispose: (_, switcher) => switcher.dispose(),
-        )
-      ],
-      child: MaterialApp(
-        title: 'ScopedModel',
-        navigatorKey: rootSwitcher.navigatorKey,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+        Provider<AccountRepository>(
+          create: (context) => Provider.of<DummyBackend>(
+            context,
+            listen: false,
+          ),
         ),
-        onGenerateRoute: routeManager.onGenerateRoute,
-        home: Scaffold(
-            body: const Center(
-          child: CircularProgressIndicator(),
-        )),
+        Provider<RootSwitcher>(
+          create: (context) => RootSwitcher(Provider.of(
+            context,
+            listen: false,
+          )),
+          dispose: (_, switcher) => switcher.dispose(),
+          lazy: false,
+        ),
+      ],
+      child: Builder(
+        builder: (context) => MaterialApp(
+          title: 'ScopedModel',
+          navigatorKey: Provider.of<RootSwitcher>(
+            context,
+            listen: false,
+          ).navigatorKey,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          onGenerateRoute: routeManager.onGenerateRoute,
+          home: Scaffold(
+              body: const Center(
+            child: CircularProgressIndicator(),
+          )),
+        ),
       ),
     );
   }

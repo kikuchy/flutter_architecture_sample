@@ -15,4 +15,7 @@ abstract class AccountRepository {
 
   /// ユーザーIDからユーザー名を取得します。
   Future<String> getAccountNameById({@required String uid});
+
+  /// ログアウトします。
+  Future<void> logout();
 }
