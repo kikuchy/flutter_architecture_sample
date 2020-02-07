@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/ui/screens/member_area/room_inside.dart';
+import 'room_inside.dart';
 
 /// チャットルーム一覧が表示される画面
 ///

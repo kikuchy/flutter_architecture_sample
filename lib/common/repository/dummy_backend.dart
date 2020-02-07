@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_architecture_samples/repository/account.dart';
-import 'package:flutter_architecture_samples/repository/entities.dart';
-import 'package:flutter_architecture_samples/repository/room.dart';
+import 'account.dart';
+import 'entities.dart';
+import 'room.dart';
 
 /// なんかそれっぽいニセモノのバックエンド
 ///

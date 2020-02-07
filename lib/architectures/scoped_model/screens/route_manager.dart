@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/ui/screens/member_area/room_edit.dart';
-import 'package:flutter_architecture_samples/ui/screens/member_area/room_inside.dart';
+import 'member_area/room_edit.dart';
+import 'member_area/room_inside.dart';
 
 import 'guest_area/make_profile.dart';
 import 'guest_area/welcome.dart';

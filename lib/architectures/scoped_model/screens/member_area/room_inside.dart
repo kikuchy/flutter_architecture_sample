@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/ui/screens/member_area/room_edit.dart';
-import 'package:flutter_architecture_samples/ui/screens/member_area/room_member.dart';
+import 'room_edit.dart';
+import 'room_member.dart';
 
 /// チャットルームの中身の画面
 /// ここで会話を楽しみます。

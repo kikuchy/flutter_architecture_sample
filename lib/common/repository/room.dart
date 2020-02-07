@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_architecture_samples/repository/entities.dart';
+import 'entities.dart';
 
 /// チャットルームの管理を行うバックエンド操作を抽象化した君
 class RoomRepository {
