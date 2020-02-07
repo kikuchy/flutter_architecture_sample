@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'make_profile/screen.dart';
+import 'make_profile.dart';
 
 /// 未登録の利用者に最初に表示される画面
 ///

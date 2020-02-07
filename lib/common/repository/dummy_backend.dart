@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
+
 import 'account.dart';
 import 'entities.dart';
 import 'room.dart';
@@ -15,6 +17,8 @@ class DummyBackend implements AccountRepository, RoomRepository {
   final Map<String, _TranscriptStreamController> _roomIdAndTranscripts = {};
 
   String _currentUser;
+  final BehaviorSubject<String> _userStateController =
+      BehaviorSubject.seeded(null);
   final List<Room> _roomsCurrentUserBelonging = [];
   final StreamController<List<Room>> _roomsStream =
       StreamController.broadcast();
@@ -32,13 +36,22 @@ class DummyBackend implements AccountRepository, RoomRepository {
   Future<String> currentUid() async => _currentUser;
 
   @override
-  Future<String> createAccount({@required String name}) async {
-    _currentUser = _generateId(32);
-    _uidAndName[_currentUser] = name;
+  Stream<String> subscribeUid() {
+    return _userStateController.stream;
+  }
 
-    _roomsCurrentUserBelonging.clear();
+  @override
+  Future<String> createAccount({@required String name}) {
+    return Future.delayed(Duration(seconds: 1), () {
+      _currentUser = _generateId(32);
+      _uidAndName[_currentUser] = name;
 
-    return _currentUser;
+      _roomsCurrentUserBelonging.clear();
+
+      _userStateController.add(_currentUser);
+
+      return _currentUser;
+    });
   }
 
   @override
@@ -64,7 +77,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
   }
 
   @override
-  Future<Function> editRoomName(
+  Future<void> editRoomName(
       {@required String roomId, @required String newName}) async {
     _roomIdAndRoom[roomId].name = newName;
   }
@@ -81,10 +94,10 @@ class DummyBackend implements AccountRepository, RoomRepository {
   }
 
   @override
-  Future<Function> postTranscript(
+  Future<void> postTranscript(
       {@required String roodId,
       @required String uid,
-      @required String content}) {
+      @required String content}) async {
     final now = DateTime.now();
     _roomIdAndTranscripts[roodId]
         .add(Transcript(body: content, postedAt: now, postedBy: uid));
@@ -115,6 +128,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
 
   void dispose() {
     _roomsStream.close();
+    _userStateController.close();
     _roomIdAndTranscripts.forEach((key, value) {
       value.close();
     });

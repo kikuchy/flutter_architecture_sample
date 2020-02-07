@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'member_area/room_edit.dart';
 import 'member_area/room_inside.dart';
 
-import 'guest_area/make_profile/screen.dart';
+import 'guest_area/make_profile.dart';
 import 'guest_area/welcome.dart';
 import 'member_area/room_list.dart';
 import 'member_area/room_member.dart';
