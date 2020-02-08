@@ -219,15 +219,15 @@ class _MutableRoom implements Room {
 }
 
 class _TranscriptStreamController {
-  final List<Transcript> _log = [];
-  final StreamController<List<Transcript>> _controller =
-      StreamController.broadcast();
+  final BehaviorSubject<List<Transcript>> _controller =
+      BehaviorSubject.seeded([]);
 
   Stream<List<Transcript>> get stream => _controller.stream;
 
   void add(Transcript transcript) {
-    _log.add(transcript);
-    _controller.add(_log);
+    final log = _controller.value;
+    log.insert(0, transcript);
+    _controller.add(log);
   }
 
   void close() {

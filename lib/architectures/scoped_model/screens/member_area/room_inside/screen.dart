@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'room_edit.dart';
-import 'room_member.dart';
+import 'package:flutter_architecture_samples/architectures/scoped_model/screens/member_area/room_inside/model.dart';
+import 'package:provider/provider.dart';
+
+import '../room_edit.dart';
+import '../room_member.dart';
 
 /// チャットルームの中身の画面
 /// ここで会話を楽しみます。
@@ -28,6 +31,28 @@ class RoomInsideScreen extends StatelessWidget {
       : roomId = args.roomId,
         assert(args.roomId != null),
         super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<TranscriptHistoryModel>(
+            create: (context) => TranscriptHistoryModel(
+                Provider.of(
+                  context,
+                  listen: false,
+                ),
+                roomId)),
+      ],
+      child: _Content(),
+    );
+  }
+}
+
+class _Content extends StatelessWidget {
+  const _Content({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -90,23 +115,38 @@ class _TranscriptArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: ListView.builder(
+    return Expanded(child: Consumer<TranscriptHistoryModel>(
+      builder: (context, model, _) {
+        final transcripts = model.transcripts;
+        return ListView.builder(
             reverse: true,
-            itemBuilder: (context, i) => ListTile(
-                  title: Text(
-                    "TODO: 人の名前",
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                  subtitle: Text("TODO: 本文が入りますますます"),
-                  trailing: Text(
-                    "2020/02/21",
-                    style: Theme.of(context)
-                        .textTheme
-                        .caption
-                        .apply(color: Theme.of(context).dividerColor),
-                  ),
-                )));
+            itemCount: transcripts.length,
+            itemBuilder: (context, i) {
+              final transcript = transcripts[i];
+              return ListTile(
+                title: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        "TODO: 人の名前 ${transcript.postedBy}",
+                        style: Theme.of(context).textTheme.caption,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      "${transcript.postedAt.hour}:${transcript.postedAt.minute}",
+                      style: Theme.of(context)
+                          .textTheme
+                          .caption
+                          .apply(color: Theme.of(context).dividerColor),
+                    ),
+                  ],
+                ),
+                subtitle: Text(transcript.body),
+              );
+            });
+      },
+    ));
   }
 }
 

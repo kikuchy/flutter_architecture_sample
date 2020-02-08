@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/architectures/scoped_model/screens/member_area/room_list/model.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:provider/provider.dart';
 
-import '../room_inside.dart';
+import '../room_inside/screen.dart';
+import 'model.dart';
 
 /// チャットルーム一覧が表示される画面
 ///
@@ -99,10 +99,14 @@ class _ListArea extends StatelessWidget {
                     itemBuilder: (context, i) {
                       final room = rooms[i];
                       return ListTile(
-                        title: Text(room.name),
-                        trailing: Text(
-                          room.lastTranscriptPostedAt.toString(),
-                          style: Theme.of(context).textTheme.caption,
+                        title: Row(
+                          children: <Widget>[
+                            Text(room.name),
+                            Text(
+                              "${room.lastTranscriptPostedAt.hour}:${room.lastTranscriptPostedAt.minute}",
+                              style: Theme.of(context).textTheme.caption,
+                            ),
+                          ],
                         ),
                         onTap: () {
                           Navigator.of(context).pushNamed(
