@@ -36,6 +36,10 @@ class RoomInsideScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<GlobalKey<ScaffoldState>>.value(value: GlobalKey()),
+        ChangeNotifierProvider<TextEditingController>.value(
+          value: TextEditingController(),
+        ),
         ChangeNotifierProvider<TranscriptHistoryModel>(
             create: (context) => TranscriptHistoryModel(
                 Provider.of(
@@ -43,10 +47,48 @@ class RoomInsideScreen extends StatelessWidget {
                   listen: false,
                 ),
                 roomId)),
+        ChangeNotifierProvider<DraftValidationModel>(
+          create: (context) => DraftValidationModel(),
+        ),
+        ChangeNotifierProvider<PostTranscriptModel>(
+            create: (context) => PostTranscriptModel(
+                    Provider.of(
+                      context,
+                      listen: false,
+                    ),
+                    Provider.of(
+                      context,
+                      listen: false,
+                    ),
+                    roomId, () {
+                  Provider.of<DraftValidationModel>(
+                    context,
+                    listen: false,
+                  ).clear();
+                  Provider.of<TextEditingController>(
+                    context,
+                    listen: false,
+                  ).clear();
+                })
+                  ..addOnError((message) {
+                    Provider.of<GlobalKey<ScaffoldState>>(
+                      context,
+                      listen: false,
+                    )
+                        .currentState
+                        .showSnackBar(SnackBar(content: Text(message)));
+                  })),
       ],
       child: _Content(),
     );
   }
+}
+
+class RoomInsideScreenArguments {
+  final String roomId;
+
+  const RoomInsideScreenArguments({@required this.roomId})
+      : assert(roomId != null);
 }
 
 class _Content extends StatelessWidget {
@@ -57,6 +99,10 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: Provider.of<GlobalKey<ScaffoldState>>(
+        context,
+        listen: false,
+      ),
       appBar: _HeaderArea(),
       body: Column(
         children: <Widget>[
@@ -99,13 +145,6 @@ class _HeaderArea extends StatelessWidget implements PreferredSizeWidget {
       ],
     );
   }
-}
-
-class RoomInsideScreenArguments {
-  final String roomId;
-
-  const RoomInsideScreenArguments({@required this.roomId})
-      : assert(roomId != null);
 }
 
 class _TranscriptArea extends StatelessWidget {
@@ -167,14 +206,46 @@ class _InputControlArea extends StatelessWidget {
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.75),
                   child: TextField(
+                    controller: Provider.of<TextEditingController>(
+                      context,
+                      listen: false,
+                    ),
                     maxLines: null,
                     maxLength: 1000,
+                    onChanged: (message) {
+                      Provider.of<DraftValidationModel>(
+                        context,
+                        listen: false,
+                      ).validate(message);
+                    },
                   ))),
-          Tooltip(
-            message: "送信",
-            child: IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.send),
+          Selector<DraftValidationModel, bool>(
+            selector: (context, model) => model.valid,
+            builder: (context, valid, child) =>
+                Selector<PostTranscriptModel, bool>(
+              selector: (context, model) =>
+                  model.currentState == PostTranscriptModelState.sending,
+              builder: (context, sending, _) {
+                if (sending) {
+                  return const CircularProgressIndicator();
+                } else {
+                  return IconButton(
+                    tooltip: "送信",
+                    onPressed: valid
+                        ? () {
+                            Provider.of<PostTranscriptModel>(
+                              context,
+                              listen: false,
+                            ).post(Provider.of<DraftValidationModel>(
+                              context,
+                              listen: false,
+                            ).body);
+                          }
+                        : null,
+                    icon: Icon(Icons.send),
+                  );
+                }
+              },
             ),
           ),
         ],
