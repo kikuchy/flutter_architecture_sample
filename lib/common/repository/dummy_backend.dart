@@ -16,12 +16,10 @@ class DummyBackend implements AccountRepository, RoomRepository {
   final Map<String, _MutableRoom> _roomIdAndRoom = {};
   final Map<String, _TranscriptStreamController> _roomIdAndTranscripts = {};
 
-  String _currentUser;
   final BehaviorSubject<String> _userStateController =
       BehaviorSubject.seeded(null);
-  final List<Room> _roomsCurrentUserBelonging = [];
-  final StreamController<List<Room>> _roomsStream =
-      StreamController.broadcast();
+  final BehaviorSubject<List<Room>> _roomsStreamController =
+      BehaviorSubject.seeded([]);
 
   static const _charsForId =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -33,7 +31,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
   }
 
   @override
-  Future<String> currentUid() async => _currentUser;
+  Future<String> currentUid() async => _userStateController.value;
 
   @override
   Stream<String> subscribeUid() {
@@ -43,14 +41,14 @@ class DummyBackend implements AccountRepository, RoomRepository {
   @override
   Future<String> createAccount({@required String name}) {
     return Future.delayed(Duration(seconds: 1), () {
-      _currentUser = _generateId(32);
-      _uidAndName[_currentUser] = name;
+      final uid = _generateId(32);
+      _uidAndName[uid] = name;
 
-      _roomsCurrentUserBelonging.clear();
+      _roomsStreamController.value.clear();
 
-      _userStateController.add(_currentUser);
+      _userStateController.add(uid);
 
-      return _currentUser;
+      return uid;
     });
   }
 
@@ -61,7 +59,6 @@ class DummyBackend implements AccountRepository, RoomRepository {
 
   @override
   Future<void> logout() async {
-    _currentUser = null;
     _userStateController.add(null);
   }
 
@@ -95,8 +92,11 @@ class DummyBackend implements AccountRepository, RoomRepository {
 
   @override
   Stream<List<Room>> subscribeRooms({@required String uid}) {
-    assert(_currentUser == uid, "アクセス権がないっす");
-    return _roomsStream.stream;
+    assert(_userStateController.value == uid, "アクセス権がないっす");
+    return _roomsStreamController.stream.map((allRooms) =>
+        allRooms.where((room) => room.joiningMembers.contains(uid)).toList()
+          ..sort((a, b) =>
+              a.lastTranscriptPostedAt.compareTo(b.lastTranscriptPostedAt)));
   }
 
   @override
@@ -109,8 +109,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
         .add(Transcript(body: content, postedAt: now, postedBy: uid));
 
     _roomIdAndRoom[roodId].lastTranscriptPostedAt = now;
-    _roomsCurrentUserBelonging.sort(
-        (a, b) => a.lastTranscriptPostedAt.compareTo(b.lastTranscriptPostedAt));
+    _roomsStreamController.add(_roomIdAndRoom.values.toList());
   }
 
   @override
@@ -124,8 +123,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
       ..joiningMembers = initialMembers
       ..lastTranscriptPostedAt = DateTime.now();
 
-    _roomsCurrentUserBelonging.add(_roomIdAndRoom[roomId]);
-    _roomsStream.add(_roomsCurrentUserBelonging);
+    _roomsStreamController.add(_roomIdAndRoom.values.toList());
 
     _roomIdAndTranscripts[roomId] = _TranscriptStreamController();
 
@@ -133,7 +131,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
   }
 
   void dispose() {
-    _roomsStream.close();
+    _roomsStreamController.close();
     _userStateController.close();
     _roomIdAndTranscripts.forEach((key, value) {
       value.close();

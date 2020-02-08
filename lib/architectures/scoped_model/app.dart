@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/screens/root_switcher.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/dummy_backend.dart';
+import 'package:flutter_architecture_samples/common/repository/room.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/route_manager.dart';
@@ -17,6 +18,12 @@ class ScopedModelApp extends StatelessWidget {
           dispose: (_, b) => b.dispose(),
         ),
         Provider<AccountRepository>(
+          create: (context) => Provider.of<DummyBackend>(
+            context,
+            listen: false,
+          ),
+        ),
+        Provider<RoomRepository>(
           create: (context) => Provider.of<DummyBackend>(
             context,
             listen: false,

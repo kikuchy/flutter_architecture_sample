@@ -4,7 +4,7 @@ import 'member_area/room_inside.dart';
 
 import 'guest_area/make_profile/screen.dart';
 import 'guest_area/welcome.dart';
-import 'member_area/room_list.dart';
+import 'member_area/room_list/screen.dart';
 import 'member_area/room_member.dart';
 
 /// どんな[Route]があるのか管理するくん
