@@ -24,6 +24,72 @@ class DummyBackend implements AccountRepository, RoomRepository {
   static const _charsForId =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   final Random _rand = Random();
+  StreamSubscription _subscription;
+
+  DummyBackend() {
+    _createDummyUsers();
+    _createDummyRooms();
+    _startPosting();
+  }
+
+  void _createDummyUsers() {
+    const names = [
+      "よしき",
+      "かさね",
+      "みはる",
+      "おき",
+      "さあや",
+      "めぐみ",
+      "ともき",
+      "よしはる",
+      "ひろし",
+      "しろう",
+      "ともき",
+      "つかさ",
+      "はるひこ",
+      "ますみ",
+    ];
+
+    _uidAndName.addAll(Map.fromIterable(names,
+        key: (_) => _generateId(32), value: (name) => name));
+  }
+
+  void _createDummyRooms() {
+    const names = [
+      "海外旅行について語れ",
+      "夕飯に悩む若人のスレ",
+      "Flutterって正直どうよ",
+      "xPlatに明るい未来は来るのか",
+      "スマホの次に来るすごいガジェットは？",
+      "眠たみがやばい",
+      "DroidKaigiの感想を語ろう",
+      "今期の覇権アニメ",
+      "がっこうぐらし！読んだ人おる？",
+      "マギレコの推しカプ",
+    ];
+
+    final keys = _uidAndName.keys.toList();
+    names.forEach((name) {
+      final pickedMembers = List.generate(_uidAndName.length, (index) {
+        return (_rand.nextBool()) ? keys[index] : null;
+      }).where((element) => element != null).toList();
+      createNewRoom(roomName: name, initialMembers: pickedMembers);
+    });
+  }
+
+  void _startPosting() {
+    _subscription = Stream.periodic(Duration(seconds: 3))
+        .flatMap((_) => Rx.combineLatest2<Room, String, Future<void>>(
+            Stream.value(_rand.nextInt(_roomIdAndRoom.length - 1))
+                .map((roomIndex) => _roomIdAndRoom.values.toList()[roomIndex]),
+            Stream.value(_rand.nextInt(_uidAndName.length - 1))
+                .map((userIndex) => _uidAndName.keys.toList()[userIndex]),
+            (room, uid) => postTranscript(
+                roodId: room.roomId,
+                uid: uid,
+                content: _generateId(80))).asyncMap((future) => future))
+        .listen((_) {});
+  }
 
   String _generateId(int length) {
     return String.fromCharCodes(List.generate(length,
@@ -47,6 +113,11 @@ class DummyBackend implements AccountRepository, RoomRepository {
       _roomsStreamController.value.clear();
 
       _userStateController.add(uid);
+
+      // とりあえず全室に突っ込んでおく
+      _roomIdAndRoom.forEach((roomId, _) {
+        addRoomMember(roomId: roomId, uid: uid);
+      });
 
       return uid;
     });
@@ -96,7 +167,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
     return _roomsStreamController.stream.map((allRooms) =>
         allRooms.where((room) => room.joiningMembers.contains(uid)).toList()
           ..sort((a, b) =>
-              a.lastTranscriptPostedAt.compareTo(b.lastTranscriptPostedAt)));
+              b.lastTranscriptPostedAt.compareTo(a.lastTranscriptPostedAt)));
   }
 
   @override
@@ -131,6 +202,7 @@ class DummyBackend implements AccountRepository, RoomRepository {
   }
 
   void dispose() {
+    _subscription.cancel();
     _roomsStreamController.close();
     _userStateController.close();
     _roomIdAndTranscripts.forEach((key, value) {

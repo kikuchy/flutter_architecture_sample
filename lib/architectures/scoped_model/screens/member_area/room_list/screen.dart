@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/screens/member_area/room_list/model.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
-import 'package:flutter_architecture_samples/common/repository/entities.dart';
 import 'package:provider/provider.dart';
+
 import '../room_inside.dart';
 
 /// チャットルーム一覧が表示される画面
@@ -75,9 +75,9 @@ class _ListArea extends StatelessWidget {
         if (loading) {
           return const Center(child: CircularProgressIndicator());
         } else {
-          return Selector<RoomListModel, List<Room>>(
-            builder: (context, rooms, _) {
-              if (rooms.isEmpty) {
+          return Selector<RoomListModel, bool>(
+            builder: (context, isEmpty, _) {
+              if (isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -93,26 +93,33 @@ class _ListArea extends StatelessWidget {
                   ),
                 );
               } else {
-                return ListView.separated(
-                  itemBuilder: (context, i) {
-                    final room = rooms[i];
-                    return ListTile(
-                      title: Text(room.name),
-                      onTap: () {
-                        Navigator.of(context).pushNamed(
-                          RoomInsideScreen.path,
-                          arguments:
-                              RoomInsideScreenArguments(roomId: room.roomId),
-                        );
-                      },
-                    );
-                  },
-                  separatorBuilder: (context, i) => const Divider(),
-                  itemCount: rooms.length,
-                );
+                return Consumer<RoomListModel>(builder: (context, model, _) {
+                  final rooms = model.rooms;
+                  return ListView.separated(
+                    itemBuilder: (context, i) {
+                      final room = rooms[i];
+                      return ListTile(
+                        title: Text(room.name),
+                        trailing: Text(
+                          room.lastTranscriptPostedAt.toString(),
+                          style: Theme.of(context).textTheme.caption,
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pushNamed(
+                            RoomInsideScreen.path,
+                            arguments:
+                                RoomInsideScreenArguments(roomId: room.roomId),
+                          );
+                        },
+                      );
+                    },
+                    separatorBuilder: (context, i) => const Divider(),
+                    itemCount: rooms.length,
+                  );
+                });
               }
             },
-            selector: (context, model) => model.rooms,
+            selector: (context, model) => model.rooms.isEmpty,
           );
         }
       },
