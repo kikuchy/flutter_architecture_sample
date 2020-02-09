@@ -32,7 +32,7 @@ class _StatefulWidgetAppState extends State<StatefulWidgetApp> {
       MakeProfileScreen.path: (context, _) => MakeProfileScreen(_backend),
       RoomListScreen.path: (context, _) => RoomListScreen(_backend, _backend),
       RoomInsideScreen.path: (context, setting) =>
-          RoomInsideScreen.fromArgs(setting.arguments),
+          RoomInsideScreen.fromArgs(setting.arguments, _backend, _backend),
     });
   }
 

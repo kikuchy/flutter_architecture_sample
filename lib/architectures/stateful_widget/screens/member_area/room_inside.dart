@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_architecture_samples/common/repository/account.dart';
+import 'package:flutter_architecture_samples/common/repository/entities.dart';
+import 'package:flutter_architecture_samples/common/repository/room.dart';
+
+const maxBodyLength = 1000;
 
 /// チャットルームの中身の画面
 /// ここで会話を楽しみます。
@@ -17,14 +22,24 @@ class RoomInsideScreen extends StatelessWidget {
   static const path = "/room/inside";
 
   final String roomId;
+  final RoomRepository room;
+  final AccountRepository account;
 
-  const RoomInsideScreen({@required this.roomId, Key key})
+  const RoomInsideScreen(
+      {@required this.roomId,
+      @required this.room,
+      @required this.account,
+      Key key})
       : assert(roomId != null),
         super(key: key);
 
-  RoomInsideScreen.fromArgs(RoomInsideScreenArguments args, {Key key})
+  RoomInsideScreen.fromArgs(
+      RoomInsideScreenArguments args, this.room, this.account,
+      {Key key})
       : roomId = args.roomId,
         assert(args.roomId != null),
+        assert(room != null),
+        assert(account != null),
         super(key: key);
 
   @override
@@ -33,8 +48,16 @@ class RoomInsideScreen extends StatelessWidget {
       appBar: _HeaderArea(),
       body: Column(
         children: <Widget>[
-          _TranscriptArea(),
-          _InputControlArea(),
+          _TranscriptArea(
+            transcriptsStream: room.subscribeTranscripts(roomId: roomId),
+          ),
+          _InputControlArea(
+            postTranscript: (message) async {
+              final uid = await account.currentUid();
+              return room.postTranscript(
+                  roodId: roomId, uid: uid, content: message);
+            },
+          ),
         ],
       ),
     );
@@ -61,36 +84,84 @@ class RoomInsideScreenArguments {
 }
 
 class _TranscriptArea extends StatelessWidget {
+  final Stream<List<Transcript>> transcriptsStream;
+
   const _TranscriptArea({
+    @required this.transcriptsStream,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: ListView.builder(
-            reverse: true,
-            itemBuilder: (context, i) => ListTile(
-                  title: Text(
-                    "TODO: 人の名前",
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                  subtitle: Text("TODO: 本文が入りますますます"),
-                  trailing: Text(
-                    "2020/02/21",
-                    style: Theme.of(context)
-                        .textTheme
-                        .caption
-                        .apply(color: Theme.of(context).dividerColor),
-                  ),
-                )));
+    return StreamBuilder<List<Transcript>>(
+      stream: transcriptsStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final transcripts = snapshot.data;
+          return Expanded(
+              child: ListView.builder(
+                  reverse: true,
+                  itemCount: transcripts.length,
+                  itemBuilder: (context, i) {
+                    final transcript = transcripts[i];
+                    return ListTile(
+                      title: Text(
+                        transcript.postedBy,
+                        style: Theme.of(context).textTheme.caption,
+                      ),
+                      subtitle: Text(transcript.body),
+                      trailing: Text(
+                        "${transcript.postedAt.hour}:${transcript.postedAt.minute}",
+                        style: Theme.of(context)
+                            .textTheme
+                            .caption
+                            .apply(color: Theme.of(context).dividerColor),
+                      ),
+                    );
+                  }));
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
   }
 }
 
-class _InputControlArea extends StatelessWidget {
+class _InputControlArea extends StatefulWidget {
+  final Future<void> Function(String) postTranscript;
+
   const _InputControlArea({
+    @required this.postTranscript,
     Key key,
   }) : super(key: key);
+
+  @override
+  __InputControlAreaState createState() => __InputControlAreaState();
+}
+
+class __InputControlAreaState extends State<_InputControlArea> {
+  TextEditingController _controller;
+  bool valid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    reset();
+  }
+
+  void validate(String message) {
+    setState(() {
+      valid = message.isNotEmpty && message.length < maxBodyLength;
+    });
+  }
+
+  void reset() {
+    _controller.clear();
+    validate(_controller.text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,18 +175,57 @@ class _InputControlArea extends StatelessWidget {
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.75),
                   child: TextField(
+                    controller: _controller,
+                    onChanged: validate,
                     maxLines: null,
-                    maxLength: 1000,
+                    maxLength: maxBodyLength,
                   ))),
-          Tooltip(
-            message: "送信",
-            child: IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.send),
-            ),
+          _SendButton(
+            valid: valid,
+            postTranscript: () async {
+              await widget.postTranscript(_controller.text);
+              reset();
+            },
           ),
         ],
       ),
     );
+  }
+}
+
+class _SendButton extends StatefulWidget {
+  final bool valid;
+  final Future<void> Function() postTranscript;
+
+  _SendButton({@required this.valid, @required this.postTranscript});
+
+  @override
+  __SendButtonState createState() => __SendButtonState();
+}
+
+class __SendButtonState extends State<_SendButton> {
+  bool sending = false;
+
+  void send() async {
+    setState(() {
+      sending = true;
+    });
+    await widget.postTranscript();
+    setState(() {
+      sending = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (sending) {
+      return const CircularProgressIndicator();
+    } else {
+      return IconButton(
+        tooltip: "送信",
+        onPressed: widget.valid ? send : null,
+        icon: Icon(Icons.send),
+      );
+    }
   }
 }
