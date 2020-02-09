@@ -30,7 +30,7 @@ class _StatefulWidgetAppState extends State<StatefulWidgetApp> {
     _routeManager = RouteManager({
       WelcomeScreen.path: (context, _) => WelcomeScreen(),
       MakeProfileScreen.path: (context, _) => MakeProfileScreen(_backend),
-      RoomListScreen.path: (context, _) => RoomListScreen(),
+      RoomListScreen.path: (context, _) => RoomListScreen(_backend, _backend),
       RoomInsideScreen.path: (context, setting) =>
           RoomInsideScreen.fromArgs(setting.arguments),
     });
@@ -58,7 +58,9 @@ class _StatefulWidgetAppState extends State<StatefulWidgetApp> {
             scheduleMicrotask(() {
               Navigator.of(context).popUntil((route) => route.isFirst);
             });
-            return (snapshot.data) ? RoomListScreen() : WelcomeScreen();
+            return (snapshot.data)
+                ? RoomListScreen(_backend, _backend)
+                : WelcomeScreen();
           } else {
             return Scaffold(
               body: const Center(

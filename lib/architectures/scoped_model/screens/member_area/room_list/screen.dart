@@ -117,7 +117,7 @@ class _ListArea extends StatelessWidget {
                       return ListTile(
                         title: Row(
                           children: <Widget>[
-                            Text(room.name),
+                            Expanded(child: Text(room.name)),
                             Text(
                               "${room.lastTranscriptPostedAt.hour}:${room.lastTranscriptPostedAt.minute}",
                               style: Theme.of(context).textTheme.caption,
