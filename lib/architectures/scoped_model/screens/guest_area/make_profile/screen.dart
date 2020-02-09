@@ -23,6 +23,8 @@ class MakeProfileScreen extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AccountProfileValidationModel()),
         Provider.value(value: GlobalKey<ScaffoldState>()),
+        ChangeNotifierProvider<TextEditingController>(
+            create: (_) => TextEditingController()),
         ChangeNotifierProvider(
             create: (context) =>
                 AccountRegistrationModel(Provider.of<AccountRepository>(
@@ -70,6 +72,10 @@ class _ProfileForm extends StatelessWidget {
         children: <Widget>[
           Consumer<AccountProfileValidationModel>(
             builder: (context, model, child) => TextField(
+              controller: Provider.of<TextEditingController>(
+                context,
+                listen: false,
+              ),
               onChanged: (name) => model.validate(name),
               decoration: InputDecoration(
                 labelText: "名前",
@@ -108,10 +114,10 @@ class _ToNextButtonArea extends StatelessWidget {
             child: RaisedButton(
               child: Text("登録"),
               onPressed: () {
-                final name = Provider.of<AccountProfileValidationModel>(
+                final name = Provider.of<TextEditingController>(
                   context,
                   listen: false,
-                ).name;
+                ).text;
                 Provider.of<AccountRegistrationModel>(
                   context,
                   listen: false,

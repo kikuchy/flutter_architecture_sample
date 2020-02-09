@@ -5,6 +5,7 @@ import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
 import 'package:flutter_architecture_samples/common/repository/room.dart';
 
+/// チャットルームの一覧を司るモデル
 class RoomListModel extends ChangeNotifier {
   final RoomRepository _room;
   final AccountRepository _account;

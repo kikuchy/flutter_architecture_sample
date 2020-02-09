@@ -175,9 +175,10 @@ class DummyBackend implements AccountRepository, RoomRepository {
       {@required String roodId,
       @required String uid,
       @required String content}) async {
+    final userName =  await getAccountNameById(uid: uid);
     final now = DateTime.now();
     _roomIdAndTranscripts[roodId]
-        .add(Transcript(body: content, postedAt: now, postedBy: uid));
+        .add(Transcript(body: content, postedAt: now, postedBy: userName));
 
     _roomIdAndRoom[roodId].lastTranscriptPostedAt = now;
     _roomsStreamController.add(_roomIdAndRoom.values.toList());

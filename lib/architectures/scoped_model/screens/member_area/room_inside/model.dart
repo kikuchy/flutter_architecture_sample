@@ -6,6 +6,7 @@ import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
 import 'package:flutter_architecture_samples/common/repository/room.dart';
 
+/// チャットルームの発言履歴を司るモデル
 class TranscriptHistoryModel extends ChangeNotifier {
   final RoomRepository _repository;
   final List<Transcript> transcripts = [];
@@ -27,6 +28,7 @@ class TranscriptHistoryModel extends ChangeNotifier {
   }
 }
 
+/// 入力しかけのテキストが受け入れ可能なものか確かめるモデル
 class DraftValidationModel extends ChangeNotifier {
   static const maxBodyLength = 1000;
   bool valid = false;
@@ -43,6 +45,7 @@ class DraftValidationModel extends ChangeNotifier {
   }
 }
 
+/// チャットルームに新しい発言を投稿するモデル
 class PostTranscriptModel extends ChangeNotifier with ErrorNotifyMixin {
   final RoomRepository _room;
   final AccountRepository _account;

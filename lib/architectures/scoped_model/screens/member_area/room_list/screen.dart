@@ -13,7 +13,6 @@ import 'model.dart';
 ///         * チャットルームの最終更新日時が変更されたとき、画面にも順番の変更が反映される
 ///         * タップするとチャットルームへ移動できる
 ///         * 参加しているチャットルームがないときは、チャットルームを作ってみることを勧める
-///     * 自分のIDが表示される
 ///     * ログアウトできる
 class RoomListScreen extends StatelessWidget {
   static const path = "/room/list";
@@ -88,7 +87,24 @@ class _ListArea extends StatelessWidget {
                         style: Theme.of(context).textTheme.headline5,
                       ),
                       Text("新しいチャットルームを作って、友達を誘ってみましょう！"),
-                      RaisedButton(child: Text("チャットルームを作る"), onPressed: () {}),
+                      RaisedButton(
+                          child: Text("チャットルームを作る"),
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                      title: const Text(
+                                          "この機能はこのサンプルでは実装していません！ごめんね！"),
+                                      actions: <Widget>[
+                                        RaisedButton(
+                                          child: const Text("閉じる"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    ));
+                          }),
                     ],
                   ),
                 );

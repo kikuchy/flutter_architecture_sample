@@ -16,8 +16,6 @@ import '../room_member.dart';
 ///     * メッセージの履歴を見ることができる
 ///         * 誰がいつどんな内容で送ったのか見える
 ///         * 新しいメッセージがあった場合は自動的に表示が更新される
-///     * チャットルームの名前を変更できる画面へ遷移できる
-///     * チャットルームのメンバーを管理できる画面へ遷移できる
 class RoomInsideScreen extends StatelessWidget {
   static const path = "/room/inside";
 
@@ -167,7 +165,7 @@ class _TranscriptArea extends StatelessWidget {
                   children: <Widget>[
                     Expanded(
                       child: Text(
-                        "TODO: 人の名前 ${transcript.postedBy}",
+                        transcript.postedBy,
                         style: Theme.of(context).textTheme.caption,
                         overflow: TextOverflow.ellipsis,
                       ),
