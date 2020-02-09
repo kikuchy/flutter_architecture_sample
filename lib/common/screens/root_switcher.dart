@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_architecture_samples/architectures/scoped_model/screens/guest_area/welcome.dart';
-import 'package:flutter_architecture_samples/architectures/scoped_model/screens/member_area/room_list/screen.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
 
 /// ログイン状態に合わせてルートの画面を切り替える君
 class RootSwitcher {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+  final String nameOfGuestRoot;
+  final String nameOfMemberRoot;
   StreamSubscription<bool> _subscription;
 
-  RootSwitcher(AccountRepository repository) {
+  RootSwitcher(AccountRepository repository, this.nameOfGuestRoot, this.nameOfMemberRoot) {
     _subscription = repository
         .subscribeUid()
         .distinct()
@@ -26,7 +26,7 @@ class RootSwitcher {
   }
 
   void onLoginStateChanged(bool loggedIn) {
-    _switchRootToNamed(loggedIn ? RoomListScreen.path : WelcomeScreen.path);
+    _switchRootToNamed(loggedIn ? nameOfMemberRoot : nameOfGuestRoot);
   }
 
   void dispose() {
