@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/screens/member_area/room_inside/model.dart';
 import 'package:provider/provider.dart';
 
-import '../room_edit.dart';
-import '../room_member.dart';
-
 /// チャットルームの中身の画面
 /// ここで会話を楽しみます。
 ///
@@ -120,27 +117,6 @@ class _HeaderArea extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text("TODO"),
-      actions: <Widget>[
-        Tooltip(
-          child: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                Navigator.of(context).pushNamed(RoomEditScreen.path,
-                    arguments: RoomEditScreenArguments(roomId: "TODO"));
-              }),
-          message: "編集",
-        ),
-        Tooltip(
-          child: IconButton(
-            icon: Icon(Icons.people),
-            onPressed: () {
-              Navigator.of(context).pushNamed(RoomMemberScreen.path,
-                  arguments: RoomMemberScreenArguments(roomId: "TODO"));
-            },
-          ),
-          message: "メンバーの管理",
-        ),
-      ],
     );
   }
 }
