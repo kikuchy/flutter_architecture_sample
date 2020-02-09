@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/app.dart';
+import 'package:flutter_architecture_samples/architectures/stateful_widget/app.dart';
 
 void main() => runApp(AppSwitcher());
 
@@ -28,15 +29,20 @@ class _AppSwitcherContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          RaisedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => ScopedModelApp()));
-            },
-            child: Text("ScopedModel"),
-          )
+          _button(context, "StatefulWidget", (context) => StatefulWidgetApp()),
+          _button(context, "ScopedModel", (context) => ScopedModelApp()),
         ],
       ),
+    );
+  }
+
+  RaisedButton _button(BuildContext context, String appName,
+      Widget Function(BuildContext) builder) {
+    return RaisedButton(
+      onPressed: () {
+        Navigator.of(context).push(MaterialPageRoute(builder: builder));
+      },
+      child: Text(appName),
     );
   }
 }

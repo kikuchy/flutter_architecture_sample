@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_architecture_samples/common/repository/account.dart';
+
+const maxNameLength = 40;
 
 /// ユーザーの登録時に入力しておいて欲しいプロフィールの入力画面。
 ///
@@ -11,24 +14,66 @@ import 'package:flutter/material.dart';
 ///     * 名前がvalidであるときのみ登録ボタンが有効になる
 ///     * 登録ボタンを押下したらユーザーが登録される
 ///     * 登録後はチャットルームの一覧画面へ移動
-class MakeProfileScreen extends StatelessWidget {
+class MakeProfileScreen extends StatefulWidget {
   static const path = "/guest/make_profile";
 
+  final AccountRepository _repository;
+
+  MakeProfileScreen(this._repository);
+
+  @override
+  _MakeProfileScreenState createState() => _MakeProfileScreenState();
+}
+
+class _MakeProfileScreenState extends State<MakeProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("プロフィール作成"),
       ),
-      body: _ProfileForm(),
+      body: _ProfileForm(repository: widget._repository),
     );
   }
 }
 
-class _ProfileForm extends StatelessWidget {
+class _ProfileForm extends StatefulWidget {
+  final AccountRepository repository;
+
   const _ProfileForm({
+    @required this.repository,
     Key key,
   }) : super(key: key);
+
+  @override
+  __ProfileFormState createState() => __ProfileFormState();
+}
+
+class __ProfileFormState extends State<_ProfileForm> {
+  TextEditingController _controller;
+  String nameValidationMessage;
+  bool loading = false;
+
+  bool get valid => nameValidationMessage == null;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    validate(_controller.text);
+  }
+
+  void validate(String name) {
+    setState(() {
+      if (name.isEmpty) {
+        nameValidationMessage = "名前を入力してください";
+      } else if (name.length > maxNameLength) {
+        nameValidationMessage = "名前は40文字以内でお願いします";
+      } else {
+        nameValidationMessage = null;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +83,58 @@ class _ProfileForm extends StatelessWidget {
           child: Column(
         children: <Widget>[
           TextFormField(
-            decoration: InputDecoration(labelText: "名前"),
-            maxLength: 40,
+            controller: _controller,
+            decoration: InputDecoration(
+                labelText: "名前", errorText: nameValidationMessage),
+            maxLength: maxNameLength,
+            onChanged: validate,
           ),
           SizedBox(
             height: 16,
           ),
-          RaisedButton(child: Text("登録"),onPressed: () {}),
+          _RegisterButton(
+            repository: widget.repository,
+            valid: valid,
+            name: _controller.text,
+          ),
         ],
       )),
     );
+  }
+}
+
+class _RegisterButton extends StatefulWidget {
+  final AccountRepository repository;
+  final String name;
+  final bool valid;
+
+  _RegisterButton(
+      {@required this.repository, @required this.name, @required this.valid});
+
+  @override
+  __RegisterButtonState createState() => __RegisterButtonState();
+}
+
+class __RegisterButtonState extends State<_RegisterButton> {
+  bool loading = false;
+
+  void register() async {
+    setState(() {
+      loading = true;
+    });
+    await widget.repository.createAccount(name: widget.name);
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return const CircularProgressIndicator();
+    } else {
+      return RaisedButton(
+          child: Text("登録"), onPressed: widget.valid ? register : null);
+    }
   }
 }
