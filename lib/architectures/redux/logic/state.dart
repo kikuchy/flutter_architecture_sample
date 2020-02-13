@@ -5,13 +5,26 @@ part 'state.freezed.dart';
 
 @immutable
 abstract class AppState with _$AppState {
-  const factory AppState({String name, String validationError}) =
-      AppStateInputting;
+  const factory AppState({
+    RegistrationState registrationState,
+    RoomListState roomListState,
+  }) = _AppState;
 
-  const factory AppState.loading({String name}) = AppStateLoading;
+  factory AppState.initial() => AppState(
+      registrationState: const RegistrationState(name: ""),
+      roomListState: const RoomListState(rooms: []));
 }
 
-extension AppStateExt on AppState {
+@immutable
+abstract class RegistrationState with _$RegistrationState {
+  const factory RegistrationState({String name, String validationError}) =
+      RegistrationStateInputting;
+
+  const factory RegistrationState.loading({String name}) =
+      RegistrationStateLoading;
+}
+
+extension AppStateExt on RegistrationState {
   bool get valid => when(
         (name, validationError) => validationError == null,
         loading: (_) => true,

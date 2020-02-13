@@ -4,11 +4,11 @@ class ValidateName {
   ValidateName(this.name);
 }
 
-class Login {}
+class Register {}
 
-class LoggedInSuccessfully {}
+class RegisteredSuccessfully {}
 
-class LoggedInFailed {}
+class RegisteredFailed {}
 
 class StartSubscribingRoom {
   final String roomId;

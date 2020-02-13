@@ -8,9 +8,85 @@ part of 'state.dart';
 // **************************************************************************
 
 mixin _$AppState {
+  RegistrationState get registrationState;
+  RoomListState get roomListState;
+
+  AppState copyWith(
+      {RegistrationState registrationState, RoomListState roomListState});
+}
+
+class _$_AppState with DiagnosticableTreeMixin implements _AppState {
+  const _$_AppState({this.registrationState, this.roomListState});
+
+  @override
+  final RegistrationState registrationState;
+  @override
+  final RoomListState roomListState;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
+    return 'AppState(registrationState: $registrationState, roomListState: $roomListState)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'AppState'))
+      ..add(DiagnosticsProperty('registrationState', registrationState))
+      ..add(DiagnosticsProperty('roomListState', roomListState));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return other is _AppState &&
+        (identical(other.registrationState, registrationState) ||
+            other.registrationState == registrationState) &&
+        (identical(other.roomListState, roomListState) ||
+            other.roomListState == roomListState);
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      registrationState.hashCode ^
+      roomListState.hashCode;
+
+  @override
+  _$_AppState copyWith({
+    Object registrationState = immutable,
+    Object roomListState = immutable,
+  }) {
+    return _$_AppState(
+      registrationState: registrationState == immutable
+          ? this.registrationState
+          : registrationState as RegistrationState,
+      roomListState: roomListState == immutable
+          ? this.roomListState
+          : roomListState as RoomListState,
+    );
+  }
+}
+
+abstract class _AppState implements AppState {
+  const factory _AppState(
+      {RegistrationState registrationState,
+      RoomListState roomListState}) = _$_AppState;
+
+  @override
+  RegistrationState get registrationState;
+  @override
+  RoomListState get roomListState;
+
+  @override
+  _AppState copyWith(
+      {RegistrationState registrationState, RoomListState roomListState});
+}
+
+mixin _$RegistrationState {
   String get name;
 
-  AppState copyWith({String name});
+  RegistrationState copyWith({String name});
 
   @optionalTypeArgs
   Result when<Result extends Object>(
@@ -27,22 +103,22 @@ mixin _$AppState {
 
   @optionalTypeArgs
   Result map<Result extends Object>(
-    Result $default(AppStateInputting value), {
-    @required Result loading(AppStateLoading value),
+    Result $default(RegistrationStateInputting value), {
+    @required Result loading(RegistrationStateLoading value),
   });
 
   @optionalTypeArgs
   Result maybeMap<Result extends Object>(
-    Result $default(AppStateInputting value), {
-    Result loading(AppStateLoading value),
+    Result $default(RegistrationStateInputting value), {
+    Result loading(RegistrationStateLoading value),
     @required Result orElse(),
   });
 }
 
-class _$AppStateInputting
+class _$RegistrationStateInputting
     with DiagnosticableTreeMixin
-    implements AppStateInputting {
-  const _$AppStateInputting({this.name, this.validationError});
+    implements RegistrationStateInputting {
+  const _$RegistrationStateInputting({this.name, this.validationError});
 
   @override
   final String name;
@@ -51,21 +127,21 @@ class _$AppStateInputting
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return 'AppState(name: $name, validationError: $validationError)';
+    return 'RegistrationState(name: $name, validationError: $validationError)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'AppState'))
+      ..add(DiagnosticsProperty('type', 'RegistrationState'))
       ..add(DiagnosticsProperty('name', name))
       ..add(DiagnosticsProperty('validationError', validationError));
   }
 
   @override
   bool operator ==(dynamic other) {
-    return other is AppStateInputting &&
+    return other is RegistrationStateInputting &&
         (identical(other.name, name) || other.name == name) &&
         (identical(other.validationError, validationError) ||
             other.validationError == validationError);
@@ -76,11 +152,11 @@ class _$AppStateInputting
       runtimeType.hashCode ^ name.hashCode ^ validationError.hashCode;
 
   @override
-  _$AppStateInputting copyWith({
+  _$RegistrationStateInputting copyWith({
     Object name = immutable,
     Object validationError = immutable,
   }) {
-    return _$AppStateInputting(
+    return _$RegistrationStateInputting(
       name: name == immutable ? this.name : name as String,
       validationError: validationError == immutable
           ? this.validationError
@@ -116,8 +192,8 @@ class _$AppStateInputting
   @override
   @optionalTypeArgs
   Result map<Result extends Object>(
-    Result $default(AppStateInputting value), {
-    @required Result loading(AppStateLoading value),
+    Result $default(RegistrationStateInputting value), {
+    @required Result loading(RegistrationStateLoading value),
   }) {
     assert($default != null);
     assert(loading != null);
@@ -127,8 +203,8 @@ class _$AppStateInputting
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>(
-    Result $default(AppStateInputting value), {
-    Result loading(AppStateLoading value),
+    Result $default(RegistrationStateInputting value), {
+    Result loading(RegistrationStateLoading value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -139,42 +215,42 @@ class _$AppStateInputting
   }
 }
 
-abstract class AppStateInputting implements AppState {
-  const factory AppStateInputting({String name, String validationError}) =
-      _$AppStateInputting;
+abstract class RegistrationStateInputting implements RegistrationState {
+  const factory RegistrationStateInputting(
+      {String name, String validationError}) = _$RegistrationStateInputting;
 
   @override
   String get name;
   String get validationError;
 
   @override
-  AppStateInputting copyWith({String name, String validationError});
+  RegistrationStateInputting copyWith({String name, String validationError});
 }
 
-class _$AppStateLoading
+class _$RegistrationStateLoading
     with DiagnosticableTreeMixin
-    implements AppStateLoading {
-  const _$AppStateLoading({this.name});
+    implements RegistrationStateLoading {
+  const _$RegistrationStateLoading({this.name});
 
   @override
   final String name;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return 'AppState.loading(name: $name)';
+    return 'RegistrationState.loading(name: $name)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'AppState.loading'))
+      ..add(DiagnosticsProperty('type', 'RegistrationState.loading'))
       ..add(DiagnosticsProperty('name', name));
   }
 
   @override
   bool operator ==(dynamic other) {
-    return other is AppStateLoading &&
+    return other is RegistrationStateLoading &&
         (identical(other.name, name) || other.name == name);
   }
 
@@ -182,10 +258,10 @@ class _$AppStateLoading
   int get hashCode => runtimeType.hashCode ^ name.hashCode;
 
   @override
-  _$AppStateLoading copyWith({
+  _$RegistrationStateLoading copyWith({
     Object name = immutable,
   }) {
-    return _$AppStateLoading(
+    return _$RegistrationStateLoading(
       name: name == immutable ? this.name : name as String,
     );
   }
@@ -218,8 +294,8 @@ class _$AppStateLoading
   @override
   @optionalTypeArgs
   Result map<Result extends Object>(
-    Result $default(AppStateInputting value), {
-    @required Result loading(AppStateLoading value),
+    Result $default(RegistrationStateInputting value), {
+    @required Result loading(RegistrationStateLoading value),
   }) {
     assert($default != null);
     assert(loading != null);
@@ -229,8 +305,8 @@ class _$AppStateLoading
   @override
   @optionalTypeArgs
   Result maybeMap<Result extends Object>(
-    Result $default(AppStateInputting value), {
-    Result loading(AppStateLoading value),
+    Result $default(RegistrationStateInputting value), {
+    Result loading(RegistrationStateLoading value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
@@ -241,14 +317,15 @@ class _$AppStateLoading
   }
 }
 
-abstract class AppStateLoading implements AppState {
-  const factory AppStateLoading({String name}) = _$AppStateLoading;
+abstract class RegistrationStateLoading implements RegistrationState {
+  const factory RegistrationStateLoading({String name}) =
+      _$RegistrationStateLoading;
 
   @override
   String get name;
 
   @override
-  AppStateLoading copyWith({String name});
+  RegistrationStateLoading copyWith({String name});
 }
 
 mixin _$RoomListState {

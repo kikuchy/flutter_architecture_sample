@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/architectures/redux/logic/actions.dart';
 import 'package:flutter_architecture_samples/architectures/redux/logic/reducers.dart';
 import 'package:flutter_architecture_samples/architectures/redux/logic/state.dart';
-import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
@@ -77,7 +76,7 @@ class _ProfileFormViewModel {
 
   factory _ProfileFormViewModel.from(Store<AppState> store) {
     return _ProfileFormViewModel(
-        validationError: store.state.validationError,
+        validationError: store.state.registrationState.validationError,
         validate: (newName) {
           store.dispatch(ValidateName(newName));
         });
@@ -94,7 +93,8 @@ class _RegisterButton extends StatelessWidget {
           return const CircularProgressIndicator();
         } else {
           return RaisedButton(
-              child: const Text("登録"), onPressed: vm.valid ? vm.register : null);
+              child: const Text("登録"),
+              onPressed: vm.valid ? vm.register : null);
         }
       },
     );
@@ -114,10 +114,10 @@ class _RegisterButtonViewModel {
 
   factory _RegisterButtonViewModel.from(Store<AppState> store) =>
       _RegisterButtonViewModel(
-        valid: store.state.valid,
-        loading: store.state is AppStateLoading,
+        valid: store.state.registrationState.valid,
+        loading: store.state.registrationState is RegistrationStateLoading,
         register: () {
-          store.dispatch(Login());
+          store.dispatch(Register());
         },
       );
 }
