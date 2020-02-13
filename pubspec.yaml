@@ -29,12 +29,17 @@ dependencies:
   bloc: ^3.0.0
   flutter_bloc: ^3.2.0
 
+  # Redux用
+  redux: ^4.0.0
+  flutter_redux: ^0.6.0
+  redux_logging: ^0.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   pedantic: ^1.8.0+1
   build_runner: ^1.7.4
-  freezed: ^0.2.3
+  freezed: ^0.2.4
 
 
 # For information on the generic Dart part of this file, see the

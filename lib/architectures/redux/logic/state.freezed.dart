@@ -7,56 +7,174 @@ part of 'state.dart';
 // FreezedGenerator
 // **************************************************************************
 
-abstract class _$AppState {
+mixin _$AppState {
+  String get name;
+
+  AppState copyWith({String name});
+
   @optionalTypeArgs
-  Result when<Result extends Object>({
-    @required Result notLoggedIn(String name),
-    @required Result LoggedIn(String currentUid),
+  Result when<Result extends Object>(
+    Result $default(String name, String validationError), {
+    @required Result loading(String name),
   });
 
   @optionalTypeArgs
-  Result maybeWhen<Result extends Object>({
-    Result notLoggedIn(String name),
-    Result LoggedIn(String currentUid),
+  Result maybeWhen<Result extends Object>(
+    Result $default(String name, String validationError), {
+    Result loading(String name),
     @required Result orElse(),
   });
 
   @optionalTypeArgs
-  Result map<Result extends Object>({
-    @required Result notLoggedIn(NotLoggedIn value),
-    @required Result LoggedIn(LoggedIn value),
+  Result map<Result extends Object>(
+    Result $default(AppStateInputting value), {
+    @required Result loading(AppStateLoading value),
   });
 
   @optionalTypeArgs
-  Result maybeMap<Result extends Object>({
-    Result notLoggedIn(NotLoggedIn value),
-    Result LoggedIn(LoggedIn value),
+  Result maybeMap<Result extends Object>(
+    Result $default(AppStateInputting value), {
+    Result loading(AppStateLoading value),
     @required Result orElse(),
   });
 }
 
-class _$NotLoggedIn with DiagnosticableTreeMixin implements NotLoggedIn {
-  const _$NotLoggedIn({this.name});
+class _$AppStateInputting
+    with DiagnosticableTreeMixin
+    implements AppStateInputting {
+  const _$AppStateInputting({this.name, this.validationError});
 
   @override
   final String name;
+  @override
+  final String validationError;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return 'AppState.notLoggedIn(name: $name)';
+    return 'AppState(name: $name, validationError: $validationError)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('type', 'AppState.notLoggedIn'))
+      ..add(DiagnosticsProperty('type', 'AppState'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('validationError', validationError));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return other is AppStateInputting &&
+        (identical(other.name, name) || other.name == name) &&
+        (identical(other.validationError, validationError) ||
+            other.validationError == validationError);
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^ name.hashCode ^ validationError.hashCode;
+
+  @override
+  _$AppStateInputting copyWith({
+    Object name = immutable,
+    Object validationError = immutable,
+  }) {
+    return _$AppStateInputting(
+      name: name == immutable ? this.name : name as String,
+      validationError: validationError == immutable
+          ? this.validationError
+          : validationError as String,
+    );
+  }
+
+  @override
+  @optionalTypeArgs
+  Result when<Result extends Object>(
+    Result $default(String name, String validationError), {
+    @required Result loading(String name),
+  }) {
+    assert($default != null);
+    assert(loading != null);
+    return $default(name, validationError);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeWhen<Result extends Object>(
+    Result $default(String name, String validationError), {
+    Result loading(String name),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if ($default != null) {
+      return $default(name, validationError);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  Result map<Result extends Object>(
+    Result $default(AppStateInputting value), {
+    @required Result loading(AppStateLoading value),
+  }) {
+    assert($default != null);
+    assert(loading != null);
+    return $default(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  Result maybeMap<Result extends Object>(
+    Result $default(AppStateInputting value), {
+    Result loading(AppStateLoading value),
+    @required Result orElse(),
+  }) {
+    assert(orElse != null);
+    if ($default != null) {
+      return $default(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class AppStateInputting implements AppState {
+  const factory AppStateInputting({String name, String validationError}) =
+      _$AppStateInputting;
+
+  @override
+  String get name;
+  String get validationError;
+
+  @override
+  AppStateInputting copyWith({String name, String validationError});
+}
+
+class _$AppStateLoading
+    with DiagnosticableTreeMixin
+    implements AppStateLoading {
+  const _$AppStateLoading({this.name});
+
+  @override
+  final String name;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
+    return 'AppState.loading(name: $name)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'AppState.loading'))
       ..add(DiagnosticsProperty('name', name));
   }
 
   @override
   bool operator ==(dynamic other) {
-    return other is NotLoggedIn &&
+    return other is AppStateLoading &&
         (identical(other.name, name) || other.name == name);
   }
 
@@ -64,172 +182,76 @@ class _$NotLoggedIn with DiagnosticableTreeMixin implements NotLoggedIn {
   int get hashCode => runtimeType.hashCode ^ name.hashCode;
 
   @override
-  _$NotLoggedIn copyWith({
+  _$AppStateLoading copyWith({
     Object name = immutable,
   }) {
-    return _$NotLoggedIn(
+    return _$AppStateLoading(
       name: name == immutable ? this.name : name as String,
     );
   }
 
   @override
   @optionalTypeArgs
-  Result when<Result extends Object>({
-    @required Result notLoggedIn(String name),
-    @required Result LoggedIn(String currentUid),
+  Result when<Result extends Object>(
+    Result $default(String name, String validationError), {
+    @required Result loading(String name),
   }) {
-    assert(notLoggedIn != null);
-    assert(LoggedIn != null);
-    return notLoggedIn(name);
+    assert($default != null);
+    assert(loading != null);
+    return loading(name);
   }
 
   @override
   @optionalTypeArgs
-  Result maybeWhen<Result extends Object>({
-    Result notLoggedIn(String name),
-    Result LoggedIn(String currentUid),
+  Result maybeWhen<Result extends Object>(
+    Result $default(String name, String validationError), {
+    Result loading(String name),
     @required Result orElse(),
   }) {
     assert(orElse != null);
-    if (notLoggedIn != null) {
-      return notLoggedIn(name);
+    if (loading != null) {
+      return loading(name);
     }
     return orElse();
   }
 
   @override
   @optionalTypeArgs
-  Result map<Result extends Object>({
-    @required Result notLoggedIn(NotLoggedIn value),
-    @required Result LoggedIn(LoggedIn value),
+  Result map<Result extends Object>(
+    Result $default(AppStateInputting value), {
+    @required Result loading(AppStateLoading value),
   }) {
-    assert(notLoggedIn != null);
-    assert(LoggedIn != null);
-    return notLoggedIn(this);
+    assert($default != null);
+    assert(loading != null);
+    return loading(this);
   }
 
   @override
   @optionalTypeArgs
-  Result maybeMap<Result extends Object>({
-    Result notLoggedIn(NotLoggedIn value),
-    Result LoggedIn(LoggedIn value),
+  Result maybeMap<Result extends Object>(
+    Result $default(AppStateInputting value), {
+    Result loading(AppStateLoading value),
     @required Result orElse(),
   }) {
     assert(orElse != null);
-    if (notLoggedIn != null) {
-      return notLoggedIn(this);
+    if (loading != null) {
+      return loading(this);
     }
     return orElse();
   }
 }
 
-abstract class NotLoggedIn implements AppState {
-  const factory NotLoggedIn({String name}) = _$NotLoggedIn;
+abstract class AppStateLoading implements AppState {
+  const factory AppStateLoading({String name}) = _$AppStateLoading;
 
+  @override
   String get name;
 
-  NotLoggedIn copyWith({String name});
+  @override
+  AppStateLoading copyWith({String name});
 }
 
-class _$LoggedIn with DiagnosticableTreeMixin implements LoggedIn {
-  const _$LoggedIn({this.currentUid});
-
-  @override
-  final String currentUid;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return 'AppState.LoggedIn(currentUid: $currentUid)';
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('type', 'AppState.LoggedIn'))
-      ..add(DiagnosticsProperty('currentUid', currentUid));
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return other is LoggedIn &&
-        (identical(other.currentUid, currentUid) ||
-            other.currentUid == currentUid);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode ^ currentUid.hashCode;
-
-  @override
-  _$LoggedIn copyWith({
-    Object currentUid = immutable,
-  }) {
-    return _$LoggedIn(
-      currentUid:
-          currentUid == immutable ? this.currentUid : currentUid as String,
-    );
-  }
-
-  @override
-  @optionalTypeArgs
-  Result when<Result extends Object>({
-    @required Result notLoggedIn(String name),
-    @required Result LoggedIn(String currentUid),
-  }) {
-    assert(notLoggedIn != null);
-    assert(LoggedIn != null);
-    return LoggedIn(currentUid);
-  }
-
-  @override
-  @optionalTypeArgs
-  Result maybeWhen<Result extends Object>({
-    Result notLoggedIn(String name),
-    Result LoggedIn(String currentUid),
-    @required Result orElse(),
-  }) {
-    assert(orElse != null);
-    if (LoggedIn != null) {
-      return LoggedIn(currentUid);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  Result map<Result extends Object>({
-    @required Result notLoggedIn(NotLoggedIn value),
-    @required Result LoggedIn(LoggedIn value),
-  }) {
-    assert(notLoggedIn != null);
-    assert(LoggedIn != null);
-    return LoggedIn(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  Result maybeMap<Result extends Object>({
-    Result notLoggedIn(NotLoggedIn value),
-    Result LoggedIn(LoggedIn value),
-    @required Result orElse(),
-  }) {
-    assert(orElse != null);
-    if (LoggedIn != null) {
-      return LoggedIn(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class LoggedIn implements AppState {
-  const factory LoggedIn({String currentUid}) = _$LoggedIn;
-
-  String get currentUid;
-
-  LoggedIn copyWith({String currentUid});
-}
-
-abstract class _$RoomListState {
+mixin _$RoomListState {
   List<Room> get rooms;
 
   RoomListState copyWith({List<Room> rooms});
@@ -283,7 +305,7 @@ abstract class _RoomListState implements RoomListState {
   _RoomListState copyWith({List<Room> rooms});
 }
 
-abstract class _$RoomInsideState {
+mixin _$RoomInsideState {
   List<Transcript> get transcripts;
   String get draft;
 

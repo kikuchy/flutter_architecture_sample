@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_architecture_samples/architectures/redux/logic/actions.dart';
+import 'package:flutter_architecture_samples/architectures/redux/logic/reducers.dart';
+import 'package:flutter_architecture_samples/architectures/redux/logic/state.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
-
-const maxNameLength = 40;
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
 /// ユーザーの登録時に入力しておいて欲しいプロフィールの入力画面。
 ///
@@ -17,9 +20,7 @@ const maxNameLength = 40;
 class MakeProfileScreen extends StatefulWidget {
   static const path = "/guest/make_profile";
 
-  final AccountRepository _repository;
-
-  MakeProfileScreen(this._repository);
+  MakeProfileScreen();
 
   @override
   _MakeProfileScreenState createState() => _MakeProfileScreenState();
@@ -32,49 +33,12 @@ class _MakeProfileScreenState extends State<MakeProfileScreen> {
       appBar: AppBar(
         title: Text("プロフィール作成"),
       ),
-      body: _ProfileForm(repository: widget._repository),
+      body: _ProfileForm(),
     );
   }
 }
 
-class _ProfileForm extends StatefulWidget {
-  final AccountRepository repository;
-
-  const _ProfileForm({
-    @required this.repository,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  __ProfileFormState createState() => __ProfileFormState();
-}
-
-class __ProfileFormState extends State<_ProfileForm> {
-  TextEditingController _controller;
-  String nameValidationMessage;
-  bool loading = false;
-
-  bool get valid => nameValidationMessage == null;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-    validate(_controller.text);
-  }
-
-  void validate(String name) {
-    setState(() {
-      if (name.isEmpty) {
-        nameValidationMessage = "名前を入力してください";
-      } else if (name.length > maxNameLength) {
-        nameValidationMessage = "名前は40文字以内でお願いします";
-      } else {
-        nameValidationMessage = null;
-      }
-    });
-  }
-
+class _ProfileForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -82,59 +46,78 @@ class __ProfileFormState extends State<_ProfileForm> {
       child: Form(
           child: Column(
         children: <Widget>[
-          TextFormField(
-            controller: _controller,
-            decoration: InputDecoration(
-                labelText: "名前", errorText: nameValidationMessage),
-            maxLength: maxNameLength,
-            onChanged: validate,
+          StoreConnector<AppState, _ProfileFormViewModel>(
+            converter: (store) => _ProfileFormViewModel.from(store),
+            onInitialBuild: (vm) => vm.validate(""),
+            builder: (context, vm) => TextFormField(
+              decoration: InputDecoration(
+                  labelText: "名前", errorText: vm.validationError),
+              maxLength: maxNameLength,
+              onChanged: vm.validate,
+            ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
-          _RegisterButton(
-            repository: widget.repository,
-            valid: valid,
-            name: _controller.text,
-          ),
+          _RegisterButton(),
         ],
       )),
     );
   }
 }
 
-class _RegisterButton extends StatefulWidget {
-  final AccountRepository repository;
-  final String name;
-  final bool valid;
+class _ProfileFormViewModel {
+  final String validationError;
+  final void Function(String) validate;
 
-  _RegisterButton(
-      {@required this.repository, @required this.name, @required this.valid});
+  _ProfileFormViewModel({
+    @required this.validationError,
+    @required this.validate,
+  });
 
-  @override
-  __RegisterButtonState createState() => __RegisterButtonState();
+  factory _ProfileFormViewModel.from(Store<AppState> store) {
+    return _ProfileFormViewModel(
+        validationError: store.state.validationError,
+        validate: (newName) {
+          store.dispatch(ValidateName(newName));
+        });
+  }
 }
 
-class __RegisterButtonState extends State<_RegisterButton> {
-  bool loading = false;
-
-  void register() async {
-    setState(() {
-      loading = true;
-    });
-    await widget.repository.createAccount(name: widget.name);
-    setState(() {
-      loading = false;
-    });
-  }
-
+class _RegisterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const CircularProgressIndicator();
-    } else {
-      return RaisedButton(
-          child: Text("登録"), onPressed: widget.valid ? register : null);
-    }
+    return StoreConnector<AppState, _RegisterButtonViewModel>(
+      converter: (store) => _RegisterButtonViewModel.from(store),
+      builder: (context, vm) {
+        if (vm.loading) {
+          return const CircularProgressIndicator();
+        } else {
+          return RaisedButton(
+              child: const Text("登録"), onPressed: vm.valid ? vm.register : null);
+        }
+      },
+    );
   }
+}
+
+class _RegisterButtonViewModel {
+  final bool valid;
+  final bool loading;
+  final void Function() register;
+
+  _RegisterButtonViewModel({
+    @required this.valid,
+    @required this.loading,
+    @required this.register,
+  });
+
+  factory _RegisterButtonViewModel.from(Store<AppState> store) =>
+      _RegisterButtonViewModel(
+        valid: store.state.valid,
+        loading: store.state is AppStateLoading,
+        register: () {
+          store.dispatch(Login());
+        },
+      );
 }
