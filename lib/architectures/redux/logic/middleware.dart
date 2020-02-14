@@ -1,12 +1,16 @@
 import 'package:flutter_architecture_samples/common/repository/account.dart';
+import 'package:flutter_architecture_samples/common/repository/room.dart';
 import 'package:redux/redux.dart';
 
 import 'actions.dart';
 import 'state.dart';
 
-List<Middleware<AppState>> generateMiddleware(AccountRepository account) {
+List<Middleware<AppState>> generateMiddleware(
+    AccountRepository account, RoomRepository room) {
   return [
     TypedMiddleware<AppState, Register>(AccountCreateMiddleware(account)),
+    TypedMiddleware<AppState, StartSubscribingRoomList>(
+        RoomListSubscribeMiddleware(room, account)),
   ];
 }
 
@@ -21,6 +25,25 @@ class AccountCreateMiddleware {
       next(RegisteredSuccessfully());
     }).catchError((_) {
       next(RegisteredFailed());
+    });
+
+    next(action);
+  }
+}
+
+class RoomListSubscribeMiddleware {
+  final RoomRepository roomRepository;
+  final AccountRepository accountRepository;
+
+  RoomListSubscribeMiddleware(this.roomRepository, this.accountRepository);
+
+  void call(Store<AppState> store, action, NextDispatcher next) {
+    accountRepository.currentUid().then((uid) {
+      final subscription =
+          roomRepository.subscribeRooms(uid: uid).listen((rooms) {
+        next(RoomListUpdated(rooms));
+      });
+      next(RoomListSubscribingStarted(subscription));
     });
 
     next(action);

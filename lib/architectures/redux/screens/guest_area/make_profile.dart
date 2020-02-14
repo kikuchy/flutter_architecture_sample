@@ -75,8 +75,9 @@ class _ProfileFormViewModel {
   });
 
   factory _ProfileFormViewModel.from(Store<AppState> store) {
+    final reg = store.state.registrationState;
     return _ProfileFormViewModel(
-        validationError: store.state.registrationState.validationError,
+        validationError: (reg.valid) ? null : reg.validationError,
         validate: (newName) {
           store.dispatch(ValidateName(newName));
         });
@@ -115,7 +116,7 @@ class _RegisterButtonViewModel {
   factory _RegisterButtonViewModel.from(Store<AppState> store) =>
       _RegisterButtonViewModel(
         valid: store.state.registrationState.valid,
-        loading: store.state.registrationState is RegistrationStateLoading,
+        loading: store.state.registrationState.loading,
         register: () {
           store.dispatch(Register());
         },

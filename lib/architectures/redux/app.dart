@@ -32,15 +32,14 @@ class _ReduxAppState extends State<ReduxApp> {
 
     store = Store(appReducer, initialState: AppState.initial(), middleware: [
       LoggingMiddleware.printer(),
-      ...generateMiddleware(widget.backend),
+      ...generateMiddleware(widget.backend, widget.backend),
     ]);
     rootSwitcher =
         RootSwitcher(widget.backend, WelcomeScreen.path, RoomListScreen.path);
     routeManager = RouteManager({
       WelcomeScreen.path: (context, _) => WelcomeScreen(),
       MakeProfileScreen.path: (context, _) => MakeProfileScreen(),
-      RoomListScreen.path: (context, _) =>
-          RoomListScreen(widget.backend, widget.backend),
+      RoomListScreen.path: (context, _) => RoomListScreen(),
       RoomInsideScreen.path: (context, setting) => RoomInsideScreen.fromArgs(
           setting.arguments, widget.backend, widget.backend),
     });

@@ -1,52 +1,58 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
 
-part 'state.freezed.dart';
+part 'state.g.dart';
 
-@immutable
-abstract class AppState with _$AppState {
-  const factory AppState({
-    RegistrationState registrationState,
-    RoomListState roomListState,
-  }) = _AppState;
+@CopyWith()
+class AppState {
+  final RegistrationState registrationState;
+  final RoomListState roomListState;
+
+  const AppState({
+    this.registrationState,
+    this.roomListState,
+  });
 
   factory AppState.initial() => AppState(
-      registrationState: const RegistrationState(name: ""),
-      roomListState: const RoomListState(rooms: []));
+      registrationState: RegistrationState.initial(),
+      roomListState: RoomListState.initial());
 }
 
-@immutable
-abstract class RegistrationState with _$RegistrationState {
-  const factory RegistrationState({String name, String validationError}) =
-      RegistrationStateInputting;
+@CopyWith()
+class RegistrationState {
+  final String name;
+  final String validationError;
+  final bool valid;
+  final bool loading;
 
-  const factory RegistrationState.loading({String name}) =
-      RegistrationStateLoading;
+  const RegistrationState(
+      {this.name, this.validationError, this.valid, this.loading});
+
+  factory RegistrationState.initial() => RegistrationState(
+      name: "", validationError: "", valid: false, loading: false);
 }
 
-extension AppStateExt on RegistrationState {
-  bool get valid => when(
-        (name, validationError) => validationError == null,
-        loading: (_) => true,
-      );
+@CopyWith()
+class RoomListState {
+  final List<Room> rooms;
+  final StreamSubscription<List<Room>> subscription;
 
-  String get validationError => when(
-        (name, validationError) => validationError,
-        loading: (_) => null,
-      );
+  const RoomListState({this.rooms, this.subscription});
+
+  factory RoomListState.initial() =>
+      RoomListState(rooms: null, subscription: null);
 }
 
-@immutable
-abstract class RoomListState with _$RoomListState {
-  const factory RoomListState({List<Room> rooms}) = _RoomListState;
-}
+@CopyWith()
+class RoomInsideState {
+  final List<Transcript> transcripts;
+  final String draft;
+  final bool sending;
 
-@immutable
-abstract class RoomInsideState with _$RoomInsideState {
-  const factory RoomInsideState({List<Transcript> transcripts, String draft}) =
-      _RoomInsideState;
+  const RoomInsideState({this.transcripts, this.draft, this.sending});
 
-  const factory RoomInsideState.sending(
-      {List<Transcript> transcripts, String draft}) = _Sending;
-// なんかもうネーミングがめちゃくちゃだし分けちゃっていいのかわからないから後で再検討
+  factory RoomInsideState.initial() =>
+      RoomInsideState(transcripts: [], draft: "", sending: false);
 }

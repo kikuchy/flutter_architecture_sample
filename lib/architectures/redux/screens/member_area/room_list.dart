@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/common/repository/account.dart';
+import 'package:flutter_architecture_samples/architectures/redux/logic/actions.dart';
+import 'package:flutter_architecture_samples/architectures/redux/logic/state.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
-import 'package:flutter_architecture_samples/common/repository/room.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 
 import 'room_inside.dart';
 
@@ -17,60 +17,51 @@ import 'room_inside.dart';
 class RoomListScreen extends StatelessWidget {
   static const path = "/room/list";
 
-  final RoomRepository room;
-  final AccountRepository account;
-
-  RoomListScreen(this.room, this.account);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("一覧"),
       ),
-      body: StreamBuilder<List<Room>>(
-        stream: account
-            .currentUid()
-            .asStream()
-            .flatMap((uid) => room.subscribeRooms(uid: uid)),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final rooms = snapshot.data;
-            if (rooms.isNotEmpty) {
-              return ListView.separated(
-                  itemBuilder: (context, i) {
-                    final room = rooms[i];
-                    return ListTile(
-                      title: Row(
-                        children: <Widget>[
-                          Expanded(child: Text(room.name)),
-                          Text(
-                            "${room.lastTranscriptPostedAt.hour}:${room.lastTranscriptPostedAt.minute}",
-                            style: Theme.of(context).textTheme.caption,
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pushNamed(
-                          RoomInsideScreen.path,
-                          arguments:
-                              RoomInsideScreenArguments(roomId: room.roomId),
-                        );
-                      },
-                    );
-                  },
-                  separatorBuilder: (context, i) => const Divider(),
-                  itemCount: rooms.length);
+      body: StoreConnector<AppState, List<Room>>(
+        converter: (store) => store.state.roomListState.rooms,
+          onInit: (store) => store.dispatch(StartSubscribingRoomList()),
+          builder: (context, rooms) {
+            if (rooms != null) {
+              if (rooms.isNotEmpty) {
+                return ListView.separated(
+                    itemBuilder: (context, i) {
+                      final room = rooms[i];
+                      return ListTile(
+                        title: Row(
+                          children: <Widget>[
+                            Expanded(child: Text(room.name)),
+                            Text(
+                              "${room.lastTranscriptPostedAt.hour}:${room.lastTranscriptPostedAt.minute}",
+                              style: Theme.of(context).textTheme.caption,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pushNamed(
+                            RoomInsideScreen.path,
+                            arguments:
+                            RoomInsideScreenArguments(roomId: room.roomId),
+                          );
+                        },
+                      );
+                    },
+                    separatorBuilder: (context, i) => const Divider(),
+                    itemCount: rooms.length);
+              } else {
+                return const _EmptyRoomList();
+              }
             } else {
-              return const _EmptyRoomList();
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
             }
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+          },),
     );
   }
 }

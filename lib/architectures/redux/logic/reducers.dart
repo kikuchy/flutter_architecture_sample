@@ -1,13 +1,12 @@
 import 'package:redux/redux.dart';
 
 import 'actions.dart';
-
 import 'state.dart';
 
 AppState appReducer(AppState state, action) {
   return state.copyWith(
     registrationState: registrationReducer(state.registrationState, action),
-    roomListState: state.roomListState,
+    roomListState: roomListReducer(state.roomListState, action),
   );
 }
 
@@ -19,11 +18,14 @@ final registrationReducer = combineReducers<RegistrationState>([
 ]);
 
 RegistrationState _validateName(RegistrationState state, ValidateName action) {
-  return state.when(
-    (name, validationError) =>
-        RegistrationState(name: action.name, validationError: _validate(action.name)),
-    loading: (_) => state,
-  );
+  if (state.loading) {
+    return state;
+  }
+  final validationResult = _validate(action.name);
+  return state.copyWith(
+      name: action.name,
+      validationError: validationResult ?? "",
+      valid: validationResult == null);
 }
 
 const maxNameLength = 40;
@@ -42,15 +44,40 @@ String _validate(String name) {
 }
 
 RegistrationState _login(RegistrationState state, Register action) {
-  return RegistrationState.loading(name: state.name);
+  return RegistrationState(name: state.name, loading: true);
 }
 
-RegistrationState _loginSuccess(RegistrationState state, RegisteredSuccessfully action) {
+RegistrationState _loginSuccess(
+    RegistrationState state, RegisteredSuccessfully action) {
   // TODO: ログイン状態に変更させるとかする
-  return RegistrationState(name: state.name);
+  return state.copyWith(loading: false);
 }
 
-RegistrationState _loginFailed(RegistrationState state, RegisteredFailed action) {
+RegistrationState _loginFailed(
+    RegistrationState state, RegisteredFailed action) {
   // TODO: エラー処理させるとかする？
-  return RegistrationState(name: state.name);
+  return state.copyWith(loading: false);
+}
+
+final roomListReducer = combineReducers<RoomListState>([
+  TypedReducer<RoomListState, StartSubscribingRoomList>(
+      _startSubscribingRoomList),
+  TypedReducer<RoomListState, RoomListSubscribingStarted>(
+      _roomListSubscribingStarted),
+  TypedReducer<RoomListState, RoomListUpdated>(_roomListUpdated),
+]);
+
+RoomListState _startSubscribingRoomList(
+    RoomListState state, StartSubscribingRoomList action) {
+  return state;
+}
+
+RoomListState _roomListSubscribingStarted(
+    RoomListState state, RoomListSubscribingStarted action) {
+  // TODO: subscriptionってどこに持たせるべき？
+  return state;
+}
+
+RoomListState _roomListUpdated(RoomListState state, RoomListUpdated action) {
+  return state.copyWith(rooms: action.rooms);
 }
