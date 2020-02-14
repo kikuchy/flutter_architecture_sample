@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_architecture_samples/architectures/redux/logic/state.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
 import 'package:flutter_architecture_samples/common/repository/room.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 
 const maxBodyLength = 1000;
 
@@ -22,24 +24,16 @@ class RoomInsideScreen extends StatelessWidget {
   static const path = "/room/inside";
 
   final String roomId;
-  final RoomRepository room;
-  final AccountRepository account;
 
-  const RoomInsideScreen(
-      {@required this.roomId,
-      @required this.room,
-      @required this.account,
-      Key key})
+  const RoomInsideScreen({@required this.roomId,
+    Key key})
       : assert(roomId != null),
         super(key: key);
 
-  RoomInsideScreen.fromArgs(
-      RoomInsideScreenArguments args, this.room, this.account,
+  RoomInsideScreen.fromArgs(RoomInsideScreenArguments args,
       {Key key})
       : roomId = args.roomId,
         assert(args.roomId != null),
-        assert(room != null),
-        assert(account != null),
         super(key: key);
 
   @override
@@ -48,9 +42,7 @@ class RoomInsideScreen extends StatelessWidget {
       appBar: _HeaderArea(),
       body: Column(
         children: <Widget>[
-          _TranscriptArea(
-            transcriptsStream: room.subscribeTranscripts(roomId: roomId),
-          ),
+          _TranscriptArea(),
           _InputControlArea(
             postTranscript: (message) async {
               final uid = await account.currentUid();
@@ -84,48 +76,45 @@ class RoomInsideScreenArguments {
 }
 
 class _TranscriptArea extends StatelessWidget {
-  final Stream<List<Transcript>> transcriptsStream;
 
   const _TranscriptArea({
-    @required this.transcriptsStream,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Transcript>>(
-      stream: transcriptsStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final transcripts = snapshot.data;
-          return Expanded(
-              child: ListView.builder(
-                  reverse: true,
-                  itemCount: transcripts.length,
-                  itemBuilder: (context, i) {
-                    final transcript = transcripts[i];
-                    return ListTile(
-                      title: Text(
-                        transcript.postedBy,
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                      subtitle: Text(transcript.body),
-                      trailing: Text(
-                        "${transcript.postedAt.hour}:${transcript.postedAt.minute}",
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption
-                            .apply(color: Theme.of(context).dividerColor),
-                      ),
-                    );
-                  }));
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
-    );
+    return StoreConnector<AppState, List<Transcript>>(
+      converter: (store) => store.state.roomInsideState.transcripts,
+      builder: (context, transcripts) {
+        return Expanded(
+            child: ListView.builder(
+                reverse: true,
+                itemCount: transcripts.length,
+                itemBuilder: (context, i) {
+                  final transcript = transcripts[i];
+                  return ListTile(
+                    title: Text(
+                      transcript.postedBy,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .caption,
+                    ),
+                    subtitle: Text(transcript.body),
+                    trailing: Text(
+                      "${transcript.postedAt.hour}:${transcript.postedAt
+                          .minute}",
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .caption
+                          .apply(color: Theme
+                          .of(context)
+                          .dividerColor),
+                    ),
+                  );
+                }));
+      },);
   }
 }
 
@@ -173,7 +162,10 @@ class __InputControlAreaState extends State<_InputControlArea> {
           Expanded(
               child: ConstrainedBox(
                   constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.75),
+                      maxHeight: MediaQuery
+                          .of(context)
+                          .size
+                          .height * 0.75),
                   child: TextField(
                     controller: _controller,
                     onChanged: validate,
@@ -182,7 +174,8 @@ class __InputControlAreaState extends State<_InputControlArea> {
                   ))),
           _SendButton(
             valid: valid,
-            postTranscript: () async {
+            send: () {
+
               await widget.postTranscript(_controller.text);
               reset();
             },
@@ -193,39 +186,26 @@ class __InputControlAreaState extends State<_InputControlArea> {
   }
 }
 
-class _SendButton extends StatefulWidget {
+class _SendButton extends StatelessWidget {
   final bool valid;
-  final Future<void> Function() postTranscript;
-
-  _SendButton({@required this.valid, @required this.postTranscript});
-
-  @override
-  __SendButtonState createState() => __SendButtonState();
-}
-
-class __SendButtonState extends State<_SendButton> {
-  bool sending = false;
-
-  void send() async {
-    setState(() {
-      sending = true;
-    });
-    await widget.postTranscript();
-    setState(() {
-      sending = false;
-    });
-  }
+  final void Function() send;
+  _SendButton({@required this.valid, @required this.send});
 
   @override
   Widget build(BuildContext context) {
-    if (sending) {
-      return const CircularProgressIndicator();
-    } else {
-      return IconButton(
-        tooltip: "送信",
-        onPressed: widget.valid ? send : null,
-        icon: Icon(Icons.send),
-      );
-    }
+    return StoreConnector<AppState, bool>(
+      converter: (store) => store.state.roomInsideState.sending,
+      builder: (context, sending) {
+        if (sending) {
+          return const CircularProgressIndicator();
+        } else {
+          return IconButton(
+            tooltip: "送信",
+            onPressed: valid ? send : null,
+            icon: Icon(Icons.send),
+          );
+        }
+      },
+    );
   }
 }

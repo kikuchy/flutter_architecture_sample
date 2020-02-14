@@ -58,11 +58,13 @@ extension RoomInsideStateCopyWithExtension on RoomInsideState {
   RoomInsideState copyWith({
     String draft,
     bool sending,
+    StreamSubscription subscription,
     List transcripts,
   }) {
     return RoomInsideState(
       draft: draft ?? this.draft,
       sending: sending ?? this.sending,
+      subscription: subscription ?? this.subscription,
       transcripts: transcripts ?? this.transcripts,
     );
   }

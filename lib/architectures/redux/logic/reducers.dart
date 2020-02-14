@@ -60,24 +60,32 @@ RegistrationState _loginFailed(
 }
 
 final roomListReducer = combineReducers<RoomListState>([
-  TypedReducer<RoomListState, StartSubscribingRoomList>(
-      _startSubscribingRoomList),
   TypedReducer<RoomListState, RoomListSubscribingStarted>(
       _roomListSubscribingStarted),
   TypedReducer<RoomListState, RoomListUpdated>(_roomListUpdated),
 ]);
 
-RoomListState _startSubscribingRoomList(
-    RoomListState state, StartSubscribingRoomList action) {
-  return state;
-}
-
 RoomListState _roomListSubscribingStarted(
     RoomListState state, RoomListSubscribingStarted action) {
-  // TODO: subscriptionってどこに持たせるべき？
-  return state;
+  return state.copyWith(subscription: action.subscription);
 }
 
 RoomListState _roomListUpdated(RoomListState state, RoomListUpdated action) {
   return state.copyWith(rooms: action.rooms);
+}
+
+final roomInsideReducer = combineReducers<RoomInsideState>([
+  TypedReducer<RoomInsideState, TranscriptSubscriptionStarted>(
+      _transcriptSubscriptionStarted),
+  TypedReducer<RoomInsideState, TranscriptUpdated>(_transcriptUpdated),
+]);
+
+RoomInsideState _transcriptSubscriptionStarted(
+    RoomInsideState state, TranscriptSubscriptionStarted action) {
+  return state.copyWith(subscription: action.subscription);
+}
+
+RoomInsideState _transcriptUpdated(
+    RoomInsideState state, TranscriptUpdated action) {
+  return state.copyWith(transcripts: action.transcripts);
 }

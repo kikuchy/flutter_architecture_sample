@@ -49,3 +49,41 @@ class RoomListSubscribeMiddleware {
     next(action);
   }
 }
+
+class TranscriptSubscribingMiddleware {
+  final RoomRepository roomRepository;
+
+  TranscriptSubscribingMiddleware(this.roomRepository);
+
+  void call(
+      Store<AppState> store, StartSubscribingRoom action, NextDispatcher next) {
+    final subscription = roomRepository
+        .subscribeTranscripts(roomId: action.roomId)
+        .listen((transcripts) {
+      next(TranscriptUpdated(transcripts));
+    });
+
+    next(action);
+    next(TranscriptSubscriptionStarted(subscription));
+  }
+}
+
+class SendMessageMiddleware {
+  final RoomRepository roomRepository;
+  final AccountRepository accountRepository;
+
+  SendMessageMiddleware(this.roomRepository, this.accountRepository);
+
+  void call(
+      Store<AppState> store, SendMessage action, NextDispatcher next) {
+    accountRepository.currentUid().then((uid) {
+      final subscription =
+      roomRepository.postTranscript(uid: uid, content: action.body).listen((rooms) {
+        next(RoomListUpdated(rooms));
+      });
+      next(RoomListSubscribingStarted(subscription));
+    });
+
+    next(action);
+  }
+}

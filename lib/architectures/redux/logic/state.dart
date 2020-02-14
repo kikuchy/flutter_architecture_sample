@@ -9,15 +9,19 @@ part 'state.g.dart';
 class AppState {
   final RegistrationState registrationState;
   final RoomListState roomListState;
+  final RoomInsideState roomInsideState;
 
   const AppState({
     this.registrationState,
     this.roomListState,
+    this.roomInsideState,
   });
 
   factory AppState.initial() => AppState(
-      registrationState: RegistrationState.initial(),
-      roomListState: RoomListState.initial());
+        registrationState: RegistrationState.initial(),
+        roomListState: RoomListState.initial(),
+        roomInsideState: RoomInsideState.initial(),
+      );
 }
 
 @CopyWith()
@@ -48,11 +52,13 @@ class RoomListState {
 @CopyWith()
 class RoomInsideState {
   final List<Transcript> transcripts;
+  final StreamSubscription<List<Transcript>> subscription;
   final String draft;
   final bool sending;
 
-  const RoomInsideState({this.transcripts, this.draft, this.sending});
+  const RoomInsideState(
+      {this.transcripts, this.draft, this.sending, this.subscription});
 
-  factory RoomInsideState.initial() =>
-      RoomInsideState(transcripts: [], draft: "", sending: false);
+  factory RoomInsideState.initial() => RoomInsideState(
+      transcripts: [], draft: "", sending: false, subscription: null);
 }

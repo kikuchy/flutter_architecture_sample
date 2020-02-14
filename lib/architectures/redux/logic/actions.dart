@@ -34,6 +34,18 @@ class StartSubscribingRoom {
   StartSubscribingRoom(this.roomId);
 }
 
+class TranscriptSubscriptionStarted {
+  final StreamSubscription<List<Transcript>> subscription;
+
+  TranscriptSubscriptionStarted(this.subscription);
+}
+
+class TranscriptUpdated {
+  final List<Transcript> transcripts;
+
+  TranscriptUpdated(this.transcripts);
+}
+
 class SendMessage {
   final String body;
 
