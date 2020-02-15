@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
-import 'package:flutter_architecture_samples/common/repository/room.dart';
 
 const maxBodyLength = 1000;
 
@@ -22,24 +20,18 @@ class RoomInsideScreen extends StatelessWidget {
   static const path = "/room/inside";
 
   final String roomId;
-  final RoomRepository room;
-  final AccountRepository account;
 
   const RoomInsideScreen(
       {@required this.roomId,
-      @required this.room,
-      @required this.account,
       Key key})
       : assert(roomId != null),
         super(key: key);
 
   RoomInsideScreen.fromArgs(
-      RoomInsideScreenArguments args, this.room, this.account,
+      RoomInsideScreenArguments args,
       {Key key})
       : roomId = args.roomId,
         assert(args.roomId != null),
-        assert(room != null),
-        assert(account != null),
         super(key: key);
 
   @override
@@ -48,16 +40,8 @@ class RoomInsideScreen extends StatelessWidget {
       appBar: _HeaderArea(),
       body: Column(
         children: <Widget>[
-          _TranscriptArea(
-            transcriptsStream: room.subscribeTranscripts(roomId: roomId),
-          ),
-          _InputControlArea(
-            postTranscript: (message) async {
-              final uid = await account.currentUid();
-              return room.postTranscript(
-                  roodId: roomId, uid: uid, content: message);
-            },
-          ),
+          _TranscriptArea(),
+          _InputControlArea(),
         ],
       ),
     );

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
-import 'package:flutter_architecture_samples/common/repository/room.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'room_inside.dart';
 
@@ -17,11 +14,6 @@ import 'room_inside.dart';
 class RoomListScreen extends StatelessWidget {
   static const path = "/room/list";
 
-  final RoomRepository room;
-  final AccountRepository account;
-
-  RoomListScreen(this.room, this.account);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,10 +21,6 @@ class RoomListScreen extends StatelessWidget {
         title: Text("一覧"),
       ),
       body: StreamBuilder<List<Room>>(
-        stream: account
-            .currentUid()
-            .asStream()
-            .flatMap((uid) => room.subscribeRooms(uid: uid)),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final rooms = snapshot.data;

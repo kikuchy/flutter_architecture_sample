@@ -27,8 +27,7 @@ dependencies:
   provider: ^4.0.3
 
   # BLoC用
-  bloc: ^3.0.0
-  flutter_bloc: ^3.2.0
+  bloc_provider: ^0.7.0
 
   # Redux用
   redux: ^4.0.0

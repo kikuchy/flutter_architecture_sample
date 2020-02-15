@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_architecture_samples/architectures/bloc/app.dart';
 import 'package:flutter_architecture_samples/architectures/redux/app.dart';
 import 'package:flutter_architecture_samples/architectures/scoped_model/app.dart';
 import 'package:flutter_architecture_samples/architectures/stateful_widget/app.dart';
@@ -32,6 +33,7 @@ class _AppSwitcherContent extends StatelessWidget {
         children: <Widget>[
           _button(context, "StatefulWidget", (context) => StatefulWidgetApp()),
           _button(context, "ScopedModel", (context) => ScopedModelApp()),
+          _button(context, "BLoC", (context) => BlocApp()),
           _button(context, "Redux", (context) => ReduxApp()),
         ],
       ),
