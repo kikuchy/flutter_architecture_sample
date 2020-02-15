@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/room.dart';
 import 'package:redux/redux.dart';
@@ -11,6 +12,10 @@ List<Middleware<AppState>> generateMiddleware(
     TypedMiddleware<AppState, Register>(AccountCreateMiddleware(account)),
     TypedMiddleware<AppState, StartSubscribingRoomList>(
         RoomListSubscribeMiddleware(room, account)),
+    TypedMiddleware<AppState, StartSubscribingRoom>(
+        TranscriptSubscribingMiddleware(room)),
+    TypedMiddleware<AppState, SendMessage>(
+        SendMessageMiddleware(room, account)),
   ];
 }
 
@@ -74,16 +79,19 @@ class SendMessageMiddleware {
 
   SendMessageMiddleware(this.roomRepository, this.accountRepository);
 
-  void call(
-      Store<AppState> store, SendMessage action, NextDispatcher next) {
+  void call(Store<AppState> store, SendMessage action, NextDispatcher next) {
     accountRepository.currentUid().then((uid) {
-      final subscription =
-      roomRepository.postTranscript(uid: uid, content: action.body).listen((rooms) {
-        next(RoomListUpdated(rooms));
-      });
-      next(RoomListSubscribingStarted(subscription));
+      var insideState = store.state.roomInsideState;
+      return roomRepository.postTranscript(
+        uid: uid,
+        content: insideState.draft,
+        roodId: insideState.roomId,
+      );
+    }).then((_) {
+      next(SendingMessageDone());
     });
 
     next(action);
+    next(SendingMessage());
   }
 }

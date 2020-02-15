@@ -40,8 +40,8 @@ class _ReduxAppState extends State<ReduxApp> {
       WelcomeScreen.path: (context, _) => WelcomeScreen(),
       MakeProfileScreen.path: (context, _) => MakeProfileScreen(),
       RoomListScreen.path: (context, _) => RoomListScreen(),
-      RoomInsideScreen.path: (context, setting) => RoomInsideScreen.fromArgs(
-          setting.arguments, widget.backend, widget.backend),
+      RoomInsideScreen.path: (context, setting) =>
+          RoomInsideScreen.fromArgs(setting.arguments),
     });
   }
 

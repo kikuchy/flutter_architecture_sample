@@ -34,6 +34,12 @@ class StartSubscribingRoom {
   StartSubscribingRoom(this.roomId);
 }
 
+class UnsubscribeRoom {
+  final String roomId;
+
+  UnsubscribeRoom(this.roomId);
+}
+
 class TranscriptSubscriptionStarted {
   final StreamSubscription<List<Transcript>> subscription;
 
@@ -46,8 +52,14 @@ class TranscriptUpdated {
   TranscriptUpdated(this.transcripts);
 }
 
-class SendMessage {
+class UpdateDraft {
   final String body;
 
-  SendMessage(this.body);
+  UpdateDraft(this.body);
 }
+
+class SendMessage {}
+
+class SendingMessage {}
+
+class SendingMessageDone {}

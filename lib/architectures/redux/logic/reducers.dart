@@ -1,3 +1,4 @@
+import 'package:flutter_architecture_samples/common/repository/entities.dart';
 import 'package:redux/redux.dart';
 
 import 'actions.dart';
@@ -7,6 +8,7 @@ AppState appReducer(AppState state, action) {
   return state.copyWith(
     registrationState: registrationReducer(state.registrationState, action),
     roomListState: roomListReducer(state.roomListState, action),
+    roomInsideState: roomInsideReducer(state.roomInsideState, action),
   );
 }
 
@@ -44,7 +46,7 @@ String _validate(String name) {
 }
 
 RegistrationState _login(RegistrationState state, Register action) {
-  return RegistrationState(name: state.name, loading: true);
+  return state.copyWith(loading: true);
 }
 
 RegistrationState _loginSuccess(
@@ -75,10 +77,26 @@ RoomListState _roomListUpdated(RoomListState state, RoomListUpdated action) {
 }
 
 final roomInsideReducer = combineReducers<RoomInsideState>([
+  TypedReducer<RoomInsideState, StartSubscribingRoom>(_startSubscribingRoom),
+  TypedReducer<RoomInsideState, UnsubscribeRoom>(_unsubscribeRoom),
   TypedReducer<RoomInsideState, TranscriptSubscriptionStarted>(
       _transcriptSubscriptionStarted),
   TypedReducer<RoomInsideState, TranscriptUpdated>(_transcriptUpdated),
+  TypedReducer<RoomInsideState, UpdateDraft>(_updateDraft),
+  TypedReducer<RoomInsideState, SendingMessage>(_sendingMessage),
+  TypedReducer<RoomInsideState, SendingMessageDone>(_sendingMessageDone),
 ]);
+
+RoomInsideState _startSubscribingRoom(
+    RoomInsideState state, StartSubscribingRoom action) {
+  return state.copyWith(roomId: action.roomId);
+}
+
+RoomInsideState _unsubscribeRoom(
+    RoomInsideState state, UnsubscribeRoom action) {
+  state.subscription.cancel();
+  return state.copyWith(subscription: null, transcripts: <Transcript>[]);
+}
 
 RoomInsideState _transcriptSubscriptionStarted(
     RoomInsideState state, TranscriptSubscriptionStarted action) {
@@ -88,4 +106,24 @@ RoomInsideState _transcriptSubscriptionStarted(
 RoomInsideState _transcriptUpdated(
     RoomInsideState state, TranscriptUpdated action) {
   return state.copyWith(transcripts: action.transcripts);
+}
+
+RoomInsideState _updateDraft(RoomInsideState state, UpdateDraft action) {
+  return state.copyWith(
+      draft: action.body, valid: _validateMessage(action.body));
+}
+
+const maxBodyLength = 1000;
+
+bool _validateMessage(String message) {
+  return message.isNotEmpty && (message.length <= maxBodyLength);
+}
+
+RoomInsideState _sendingMessage(RoomInsideState state, SendingMessage action) {
+  return state.copyWith(sending: true);
+}
+
+RoomInsideState _sendingMessageDone(
+    RoomInsideState state, SendingMessageDone action) {
+  return state.copyWith(sending: false, draft: "", valid: false);
 }

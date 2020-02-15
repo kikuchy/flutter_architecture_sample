@@ -55,10 +55,22 @@ class RoomInsideState {
   final StreamSubscription<List<Transcript>> subscription;
   final String draft;
   final bool sending;
+  final String roomId;
+  final bool valid;
 
-  const RoomInsideState(
-      {this.transcripts, this.draft, this.sending, this.subscription});
+  const RoomInsideState({
+    this.transcripts,
+    this.draft,
+    this.sending,
+    this.subscription,
+    this.roomId,
+    this.valid,
+  });
 
   factory RoomInsideState.initial() => RoomInsideState(
-      transcripts: [], draft: "", sending: false, subscription: null);
+      transcripts: [],
+      draft: "",
+      sending: false,
+      subscription: null,
+      valid: false);
 }

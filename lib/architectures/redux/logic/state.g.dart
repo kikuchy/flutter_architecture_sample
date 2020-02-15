@@ -11,10 +11,12 @@ part of 'state.dart';
 extension AppStateCopyWithExtension on AppState {
   AppState copyWith({
     RegistrationState registrationState,
+    RoomInsideState roomInsideState,
     RoomListState roomListState,
   }) {
     return AppState(
       registrationState: registrationState ?? this.registrationState,
+      roomInsideState: roomInsideState ?? this.roomInsideState,
       roomListState: roomListState ?? this.roomListState,
     );
   }
@@ -57,15 +59,19 @@ extension RoomListStateCopyWithExtension on RoomListState {
 extension RoomInsideStateCopyWithExtension on RoomInsideState {
   RoomInsideState copyWith({
     String draft,
+    String roomId,
     bool sending,
     StreamSubscription subscription,
     List transcripts,
+    bool valid,
   }) {
     return RoomInsideState(
       draft: draft ?? this.draft,
+      roomId: roomId ?? this.roomId,
       sending: sending ?? this.sending,
       subscription: subscription ?? this.subscription,
       transcripts: transcripts ?? this.transcripts,
+      valid: valid ?? this.valid,
     );
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_architecture_samples/architectures/redux/logic/state.dart';
-import 'package:flutter_architecture_samples/common/repository/account.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
-import 'package:flutter_architecture_samples/common/repository/room.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+
+import '../..//logic/state.dart';
+import '../../logic/actions.dart';
 
 const maxBodyLength = 1000;
 
@@ -25,13 +25,11 @@ class RoomInsideScreen extends StatelessWidget {
 
   final String roomId;
 
-  const RoomInsideScreen({@required this.roomId,
-    Key key})
+  const RoomInsideScreen({@required this.roomId, Key key})
       : assert(roomId != null),
         super(key: key);
 
-  RoomInsideScreen.fromArgs(RoomInsideScreenArguments args,
-      {Key key})
+  RoomInsideScreen.fromArgs(RoomInsideScreenArguments args, {Key key})
       : roomId = args.roomId,
         assert(args.roomId != null),
         super(key: key);
@@ -42,14 +40,10 @@ class RoomInsideScreen extends StatelessWidget {
       appBar: _HeaderArea(),
       body: Column(
         children: <Widget>[
-          _TranscriptArea(),
-          _InputControlArea(
-            postTranscript: (message) async {
-              final uid = await account.currentUid();
-              return room.postTranscript(
-                  roodId: roomId, uid: uid, content: message);
-            },
+          _TranscriptArea(
+            roomId: roomId,
           ),
+          _InputControlArea(),
         ],
       ),
     );
@@ -76,8 +70,10 @@ class RoomInsideScreenArguments {
 }
 
 class _TranscriptArea extends StatelessWidget {
+  final String roomId;
 
   const _TranscriptArea({
+    @required this.roomId,
     Key key,
   }) : super(key: key);
 
@@ -85,6 +81,8 @@ class _TranscriptArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return StoreConnector<AppState, List<Transcript>>(
       converter: (store) => store.state.roomInsideState.transcripts,
+      onInit: (store) => store.dispatch(StartSubscribingRoom(roomId)),
+      onDispose: (store) => store.dispatch(UnsubscribeRoom(roomId)),
       builder: (context, transcripts) {
         return Expanded(
             child: ListView.builder(
@@ -95,61 +93,35 @@ class _TranscriptArea extends StatelessWidget {
                   return ListTile(
                     title: Text(
                       transcript.postedBy,
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .caption,
+                      style: Theme.of(context).textTheme.caption,
                     ),
                     subtitle: Text(transcript.body),
                     trailing: Text(
-                      "${transcript.postedAt.hour}:${transcript.postedAt
-                          .minute}",
-                      style: Theme
-                          .of(context)
+                      "${transcript.postedAt.hour}:${transcript.postedAt.minute}",
+                      style: Theme.of(context)
                           .textTheme
                           .caption
-                          .apply(color: Theme
-                          .of(context)
-                          .dividerColor),
+                          .apply(color: Theme.of(context).dividerColor),
                     ),
                   );
                 }));
-      },);
+      },
+    );
   }
 }
 
 class _InputControlArea extends StatefulWidget {
-  final Future<void> Function(String) postTranscript;
-
-  const _InputControlArea({
-    @required this.postTranscript,
-    Key key,
-  }) : super(key: key);
-
   @override
   __InputControlAreaState createState() => __InputControlAreaState();
 }
 
 class __InputControlAreaState extends State<_InputControlArea> {
-  TextEditingController _controller;
-  bool valid = false;
+  TextEditingController controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
-    reset();
-  }
-
-  void validate(String message) {
-    setState(() {
-      valid = message.isNotEmpty && message.length < maxBodyLength;
-    });
-  }
-
-  void reset() {
-    _controller.clear();
-    validate(_controller.text);
+    controller = TextEditingController();
   }
 
   @override
@@ -157,38 +129,58 @@ class __InputControlAreaState extends State<_InputControlArea> {
     return Container(
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(color: Colors.black12),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-              child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      maxHeight: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.75),
-                  child: TextField(
-                    controller: _controller,
-                    onChanged: validate,
-                    maxLines: null,
-                    maxLength: maxBodyLength,
-                  ))),
-          _SendButton(
-            valid: valid,
-            send: () {
-
-              await widget.postTranscript(_controller.text);
-              reset();
-            },
-          ),
-        ],
+      child: StoreConnector<AppState, _InputControlAreaViewModel>(
+        converter: (store) => _InputControlAreaViewModel(
+            updateDraft: (body) => store.dispatch(UpdateDraft(body)),
+            valid: store.state.roomInsideState.valid,
+            draft: store.state.roomInsideState.draft,
+            postTranscript: () {
+              store.dispatch(SendMessage());
+              controller.clear();
+            }),
+        builder: (context, vm) => Row(
+          children: <Widget>[
+            Expanded(
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.75),
+                    child: TextField(
+                      controller: controller,
+                      onChanged: (body) {
+                        vm.updateDraft(body);
+                      },
+                      maxLines: null,
+                      maxLength: maxBodyLength,
+                    ))),
+            _SendButton(
+              valid: vm.valid,
+              send: vm.postTranscript,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+class _InputControlAreaViewModel {
+  final void Function(String) updateDraft;
+  final bool valid;
+  final String draft;
+  final void Function() postTranscript;
+
+  _InputControlAreaViewModel({
+    @required this.updateDraft,
+    @required this.valid,
+    @required this.draft,
+    @required this.postTranscript,
+  });
+}
+
 class _SendButton extends StatelessWidget {
   final bool valid;
   final void Function() send;
+
   _SendButton({@required this.valid, @required this.send});
 
   @override
