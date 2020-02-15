@@ -1,7 +1,10 @@
+import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
+import 'package:provider/provider.dart';
 
-import 'room_inside.dart';
+import '../room_inside.dart';
+import 'bloc.dart';
 
 /// チャットルーム一覧が表示される画面
 ///
@@ -16,11 +19,28 @@ class RoomListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<RoomListBloc>(
+        creator: (context, bag) => RoomListBloc(
+              accountRepository: Provider.of(context, listen: false),
+              roomRepository: Provider.of(context, listen: false),
+            ),
+        child: _Content());
+  }
+}
+
+class _Content extends StatelessWidget {
+  const _Content({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("一覧"),
       ),
       body: StreamBuilder<List<Room>>(
+        stream: BlocProvider.of<RoomListBloc>(context).rooms,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final rooms = snapshot.data;

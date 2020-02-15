@@ -9,7 +9,7 @@ import '../../common/screens/route_manager.dart';
 import 'screens/guest_area/make_profile/screen.dart';
 import 'screens/guest_area/welcome.dart';
 import 'screens/member_area/room_inside.dart';
-import 'screens/member_area/room_list.dart';
+import 'screens/member_area/room_list/screen.dart';
 
 class BlocApp extends StatelessWidget {
   @override
