@@ -1,5 +1,9 @@
+import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
+import 'package:provider/provider.dart';
+
+import 'bloc.dart';
 
 const maxBodyLength = 1000;
 
@@ -21,18 +25,66 @@ class RoomInsideScreen extends StatelessWidget {
 
   final String roomId;
 
-  const RoomInsideScreen(
-      {@required this.roomId,
-      Key key})
+  const RoomInsideScreen({@required this.roomId, Key key})
       : assert(roomId != null),
         super(key: key);
 
-  RoomInsideScreen.fromArgs(
-      RoomInsideScreenArguments args,
-      {Key key})
+  RoomInsideScreen.fromArgs(RoomInsideScreenArguments args, {Key key})
       : roomId = args.roomId,
         assert(args.roomId != null),
         super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<TextEditingController>(
+      create: (context) => TextEditingController(),
+      child: BlocProviderTree(blocProviders: [
+        BlocProvider<TranscriptHistoryBloc>(
+          creator: (context, bag) => TranscriptHistoryBloc(
+              roomId,
+              Provider.of(
+                context,
+                listen: false,
+              )),
+        ),
+        BlocProvider<MessageBloc>(
+          creator: (context, bag) {
+            final bloc = MessageBloc(
+              roomId: roomId,
+              accountRepository: Provider.of(
+                context,
+                listen: false,
+              ),
+              roomRepository: Provider.of(
+                context,
+                listen: false,
+              ),
+            );
+            final subscription = bloc.result.listen((result) {
+              switch (result) {
+                case MessageSendResult.failure:
+                  break;
+                case MessageSendResult.success:
+                  Provider.of<TextEditingController>(context, listen: false)
+                      .clear();
+                  break;
+              }
+            });
+            bag.register(onDisposed: () {
+              subscription.cancel();
+            });
+            return bloc;
+          },
+        )
+      ], child: _Content()),
+    );
+  }
+}
+
+class _Content extends StatelessWidget {
+  const _Content({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +120,16 @@ class RoomInsideScreenArguments {
 }
 
 class _TranscriptArea extends StatelessWidget {
-  final Stream<List<Transcript>> transcriptsStream;
-
   const _TranscriptArea({
-    @required this.transcriptsStream,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<TranscriptHistoryBloc>(context);
+
     return StreamBuilder<List<Transcript>>(
-      stream: transcriptsStream,
+      stream: bloc.transcripts,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final transcripts = snapshot.data;
@@ -113,42 +164,11 @@ class _TranscriptArea extends StatelessWidget {
   }
 }
 
-class _InputControlArea extends StatefulWidget {
-  final Future<void> Function(String) postTranscript;
-
-  const _InputControlArea({
-    @required this.postTranscript,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  __InputControlAreaState createState() => __InputControlAreaState();
-}
-
-class __InputControlAreaState extends State<_InputControlArea> {
-  TextEditingController _controller;
-  bool valid = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-    reset();
-  }
-
-  void validate(String message) {
-    setState(() {
-      valid = message.isNotEmpty && message.length < maxBodyLength;
-    });
-  }
-
-  void reset() {
-    _controller.clear();
-    validate(_controller.text);
-  }
-
+class _InputControlArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<MessageBloc>(context);
+
     return Container(
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(color: Colors.black12),
@@ -159,57 +179,50 @@ class __InputControlAreaState extends State<_InputControlArea> {
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height * 0.75),
                   child: TextField(
-                    controller: _controller,
-                    onChanged: validate,
+                    controller: Provider.of(context, listen: false),
+                    onChanged: bloc.body.add,
                     maxLines: null,
                     maxLength: maxBodyLength,
                   ))),
-          _SendButton(
-            valid: valid,
-            postTranscript: () async {
-              await widget.postTranscript(_controller.text);
-              reset();
-            },
-          ),
+          StreamBuilder<bool>(
+              stream: bloc.valid,
+              builder: (context, snapshot) => _SendButton(
+                    valid: snapshot.data ?? false,
+                    postTranscript: () {
+                      bloc.send.add(null);
+                    },
+                  )),
         ],
       ),
     );
   }
 }
 
-class _SendButton extends StatefulWidget {
+class _SendButton extends StatelessWidget {
   final bool valid;
-  final Future<void> Function() postTranscript;
+  final void Function() postTranscript;
 
-  _SendButton({@required this.valid, @required this.postTranscript});
-
-  @override
-  __SendButtonState createState() => __SendButtonState();
-}
-
-class __SendButtonState extends State<_SendButton> {
-  bool sending = false;
-
-  void send() async {
-    setState(() {
-      sending = true;
-    });
-    await widget.postTranscript();
-    setState(() {
-      sending = false;
-    });
-  }
+  _SendButton({
+    @required this.valid,
+    @required this.postTranscript,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (sending) {
-      return const CircularProgressIndicator();
-    } else {
-      return IconButton(
-        tooltip: "送信",
-        onPressed: widget.valid ? send : null,
-        icon: Icon(Icons.send),
-      );
-    }
+    final bloc = BlocProvider.of<MessageBloc>(context);
+    return StreamBuilder<bool>(
+      stream: bloc.sending,
+      builder: (context, snapshot) {
+        if (snapshot.data ?? false) {
+          return const CircularProgressIndicator();
+        } else {
+          return IconButton(
+            tooltip: "送信",
+            onPressed: valid ? postTranscript : null,
+            icon: Icon(Icons.send),
+          );
+        }
+      },
+    );
   }
 }

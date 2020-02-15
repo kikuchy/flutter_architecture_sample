@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../common/screens/route_manager.dart';
 import 'screens/guest_area/make_profile/screen.dart';
 import 'screens/guest_area/welcome.dart';
-import 'screens/member_area/room_inside.dart';
+import 'screens/member_area/room_inside/screen.dart';
 import 'screens/member_area/room_list/screen.dart';
 
 class BlocApp extends StatelessWidget {

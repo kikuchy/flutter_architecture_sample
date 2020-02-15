@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_architecture_samples/common/repository/entities.dart';
 import 'package:provider/provider.dart';
 
-import '../room_inside.dart';
+import '../room_inside/screen.dart';
 import 'bloc.dart';
 
 /// チャットルーム一覧が表示される画面

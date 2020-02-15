@@ -22,15 +22,20 @@ class MakeProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProviderTree(blocProviders: [
-      BlocProvider<ProfileValidation>(
-        creator: (context, bag) => ProfileValidation(),
-      ),
-      BlocProvider<AccountRegistrationBloc>(creator: (context, bag) => AccountRegistrationBloc(
-        name: BlocProvider.of<ProfileValidation>(context).name.stream,
-        repository: Provider.of(context, listen: false),
-      ),),
-    ], child: _Content(),);
+    return BlocProviderTree(
+      blocProviders: [
+        BlocProvider<ProfileValidation>(
+          creator: (context, bag) => ProfileValidation(),
+        ),
+        BlocProvider<AccountRegistrationBloc>(
+          creator: (context, bag) => AccountRegistrationBloc(
+            name: BlocProvider.of<ProfileValidation>(context).name.stream,
+            repository: Provider.of(context, listen: false),
+          ),
+        ),
+      ],
+      child: _Content(),
+    );
   }
 }
 
@@ -104,9 +109,12 @@ class _RegisterButton extends StatelessWidget {
           return const CircularProgressIndicator();
         } else {
           return RaisedButton(
-              child: Text("登録"), onPressed: valid ? (){
-                bloc.register.add(null);
-          } : null);
+              child: Text("登録"),
+              onPressed: valid
+                  ? () {
+                      bloc.register.add(null);
+                    }
+                  : null);
         }
       },
     );
